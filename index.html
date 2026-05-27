@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Katalog Książek</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body style="font-family: Arial, sans-serif; margin: 20px;">
+
+    <header style="border-bottom: 2px solid #ccc; padding-bottom: 10px; margin-bottom: 20px;">
+        <h1>Moja Biblioteka</h1>
+        <nav>
+            <button id="btn-lista" style="padding: 10px; cursor: pointer;">Lista Książek</button>
+            <button id="btn-dodaj" style="padding: 10px; cursor: pointer;">Dodaj Książkę</button>
+        </nav>
+    </header>
+
+    <main>
+        <section id="sekcja-lista">
+            <h2>Wszystkie Książki</h2>
+            <div id="lista-ksiazek-kontener">
+                <p>Ładowanie książek...</p>
+            </div>
+        </section>
+
+        <section id="sekcja-dodaj" style="display: none;">
+            <h2>Dodaj nową książkę</h2>
+            <form id="formularz-ksiazki">
+                <div style="margin-bottom: 10px;">
+                    <label for="tytul">Tytuł:</label><br>
+                    <input type="text" id="tytul" required style="width: 300px; padding: 5px;">
+                </div>
+
+                <div style="margin-bottom: 10px;">
+                    <label for="autor">Autor:</label><br>
+                    <input type="text" id="autor" required style="width: 300px; padding: 5px;">
+                </div>
+
+                <div style="margin-bottom: 10px;">
+                    <label for="opis">Opis:</label><br>
+                    <textarea id="opis" rows="4" required style="width: 300px; padding: 5px;"></textarea>
+                </div>
+
+                <button type="submit" style="padding: 10px; cursor: pointer;">Zapisz książkę</button>
+            </form>
+        </section>
+
+        <section id="sekcja-szczegoly" style="display: none;">
+            <button id="btn-powrot" style="padding: 5px 10px; cursor: pointer; margin-bottom: 15px;">🔙 Powrót do listy</button>
+            <h2 id="detale-tytul">Tytuł Książki</h2>
+            <h4 id="detale-autor" style="color: gray;">Autor</h4>
+            <p id="detale-opis">Opis książki pojawi się tutaj...</p>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
