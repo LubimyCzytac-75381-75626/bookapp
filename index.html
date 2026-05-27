@@ -6,51 +6,59 @@
     <title>Katalog Książek</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body style="font-family: Arial, sans-serif; margin: 20px;">
+<body>
 
-    <header style="border-bottom: 2px solid #ccc; padding-bottom: 10px; margin-bottom: 20px;">
-        <h1>Moja Biblioteka</h1>
-        <nav>
-            <button id="btn-lista" style="padding: 10px; cursor: pointer;">Lista Książek</button>
-            <button id="btn-dodaj" style="padding: 10px; cursor: pointer;">Dodaj Książkę</button>
-        </nav>
+    <header class="glowny-header">
+        <div class="kontener header-wewnatrz">
+            <h1 class="logo">Katalog<span>Książek</span></h1>
+            <nav class="menu-glowne">
+                <button id="btn-lista" class="btn-menu">Katalog</button>
+                <button id="btn-dodaj" class="btn-akcja">Dodaj Książkę</button>
+            </nav>
+        </div>
     </header>
 
-    <main>
-        <section id="sekcja-lista">
-            <h2>Wszystkie Książki</h2>
+    <main class="kontener">
+        <section id="sekcja-lista" class="karta-zawartosci">
+            <h2 class="tytul-sekcji">Wszystkie Książki</h2>
             <div id="lista-ksiazek-kontener">
-                <p>Ładowanie książek...</p>
+                <p class="pusty-stan">Ładowanie książek...</p>
             </div>
         </section>
 
-        <section id="sekcja-dodaj" style="display: none;">
-            <h2>Dodaj nową książkę</h2>
+        <section id="sekcja-dodaj" class="karta-zawartosci" style="display: none;">
+            <h2 class="tytul-sekcji">Dodaj nową książkę do bazy</h2>
             <form id="formularz-ksiazki">
-                <div style="margin-bottom: 10px;">
-                    <label for="tytul">Tytuł:</label><br>
-                    <input type="text" id="tytul" required style="width: 300px; padding: 5px;">
+                <div class="form-grupa">
+                    <label for="tytul">Tytuł książki</label>
+                    <input type="text" id="tytul" placeholder="np. Wiedźmin: Ostatnie życzenie" required>
                 </div>
 
-                <div style="margin-bottom: 10px;">
-                    <label for="autor">Autor:</label><br>
-                    <input type="text" id="autor" required style="width: 300px; padding: 5px;">
+                <div class="form-grupa">
+                    <label for="autor">Autor</label>
+                    <input type="text" id="autor" placeholder="np. Andrzej Sapkowski" required>
                 </div>
 
-                <div style="margin-bottom: 10px;">
-                    <label for="opis">Opis:</label><br>
-                    <textarea id="opis" rows="4" required style="width: 300px; padding: 5px;"></textarea>
+                <div class="form-grupa">
+                    <label for="opis">Opis fabuły</label>
+                    <textarea id="opis" rows="5" placeholder="Napisz krótko o czym jest ta książka..." required></textarea>
                 </div>
 
-                <button type="submit" style="padding: 10px; cursor: pointer;">Zapisz książkę</button>
+                <button type="submit" id="btn-zapisz" class="btn-akcja btn-duzy">Zapisz książkę</button>
             </form>
         </section>
 
-        <section id="sekcja-szczegoly" style="display: none;">
-            <button id="btn-powrot" style="padding: 5px 10px; cursor: pointer; margin-bottom: 15px;">🔙 Powrót do listy</button>
-            <h2 id="detale-tytul">Tytuł Książki</h2>
-            <h4 id="detale-autor" style="color: gray;">Autor</h4>
-            <p id="detale-opis">Opis książki pojawi się tutaj...</p>
+        <section id="sekcja-szczegoly" class="karta-zawartosci" style="display: none;">
+            <button id="btn-powrot" class="btn-szary">🔙 Powrót do katalogu</button>
+            
+            <div class="szczegoly-ksiazki">
+                <div class="okladka-placeholder">Brak okładki</div>
+                <div class="info">
+                    <h2 id="detale-tytul" class="tytul-ksiazki">Tytuł Książki</h2>
+                    <h4 id="detale-autor" class="autor-ksiazki">Autor</h4>
+                    <p id="detale-opis" class="opis-ksiazki">Opis książki pojawi się tutaj...</p>
+                </div>
+            </div>
         </section>
     </main>
 
