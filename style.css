@@ -171,3 +171,63 @@ input:focus, textarea:focus {
 .btn-szary:hover {
     background-color: #e9e9e9;
 }
+/* siatka książek */
+.siatka-ksiazek {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 25px;
+    margin-top: 20px;
+}
+
+.karta-ksiazki {
+    border: 1px solid #eaeaea;
+    border-radius: 4px;
+    overflow: hidden;
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.karta-ksiazki:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+}
+
+.karta-okladka {
+    height: 250px;
+    background-color: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #adb5bd;
+    font-size: 14px;
+    border-bottom: 1px solid #eaeaea;
+}
+
+.karta-info {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.karta-tytul {
+    font-size: 16px;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.karta-autor {
+    font-size: 14px;
+    color: #78b833;
+    margin-bottom: 15px;
+    flex-grow: 1; 
+}
+
+.btn-maly {
+    padding: 8px;
+    font-size: 13px;
+    width: 100%;
+    margin-left: 0; 
+}
