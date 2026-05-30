@@ -19,62 +19,23 @@ function pokazSekcje(sekcjaDoPokazania) {
     sekcjaDoPokazania.style.display = 'block';
 }
 
-// przypinamy zdarzenia kliknięcia do przycisków
+// przypinamy zdarzenia kliknięcia do menu
 btnLista.addEventListener('click', () => pokazSekcje(sekcjaLista));
 btnDodaj.addEventListener('click', () => pokazSekcje(sekcjaDodaj));
 btnPowrot.addEventListener('click', () => pokazSekcje(sekcjaLista));
 
-// obsługa formularza dodawania książki
-const formularz = document.getElementById('formularz-ksiazki');
-
-formularz.addEventListener('submit', (e) => {
-    // zatrzymujemy przeładowanie strony
-    e.preventDefault(); 
-
-    // zbieramy dane z formularza
-    const nowaKsiazka = {
-        tytul: document.getElementById('tytul').value.trim(),
-        autor: document.getElementById('autor').value.trim(),
-        opis: document.getElementById('opis').value.trim()
-    };
-
-    // wypisujemy w konsoli do testów
-    console.log('dane gotowe do wysłania na backend:', nowaKsiazka);
-    alert('Dane zebrane! Otwórz konsolę (F12).');
-
-    // czyścimy formularz po kliknięciu
-    formularz.reset(); 
-    
-    // automatycznie wracamy do listy książek
-    pokazSekcje(sekcjaLista); 
-});
-
-// tymczasowa baza danych (mock) do testowania interfejsu
+// tymczasowa baza danych (mock)
 let ksiazkiMock = [
-    { 
-        id: 1, 
-        tytul: "Wiedźmin: Ostatnie życzenie", 
-        autor: "Andrzej Sapkowski", 
-        opis: "Zbiór opowiadań o wiedźminie Geralcie z Rivii." 
-    },
-    { 
-        id: 2, 
-        tytul: "Solaris", 
-        autor: "Stanisław Lem", 
-        opis: "Klasyka science fiction o kontakcie z obcą inteligencją na planecie pokrytej żywym oceanem." 
-    },
-    { 
-        id: 3, 
-        tytul: "Diuna", 
-        autor: "Frank Herbert", 
-        opis: "Epicka opowieść o pustynnej planecie Arrakis i najcenniejszej substancji we wszechświecie - przyprawie." 
-    }
+    { id: 1, tytul: "Wiedźmin: Ostatnie życzenie", autor: "Andrzej Sapkowski", opis: "Zbiór opowiadań o wiedźminie Geralcie z Rivii." },
+    { id: 2, tytul: "Solaris", autor: "Stanisław Lem", opis: "Klasyka science fiction o kontakcie z obcą inteligencją." },
+    { id: 3, tytul: "Diuna", autor: "Frank Herbert", opis: "Epicka opowieść o pustynnej planecie Arrakis." }
 ];
 
 // funkcja do rysowania kart książek na stronie
 function renderujListeKsiazek() {
     const kontener = document.getElementById('lista-ksiazek-kontener');
-
+    
+    // czyścimy kontener
     kontener.innerHTML = '';
 
     if (ksiazkiMock.length === 0) {
@@ -82,6 +43,7 @@ function renderujListeKsiazek() {
         return;
     }
 
+    // generujemy html dla każdej książki
     ksiazkiMock.forEach(ksiazka => {
         const karta = document.createElement('div');
         karta.className = 'karta-ksiazki';
@@ -94,15 +56,53 @@ function renderujListeKsiazek() {
                 <button class="btn-akcja btn-maly" onclick="pokazSzczegoly(${ksiazka.id})">Szczegóły</button>
             </div>
         `;
-
         kontener.appendChild(karta);
     });
 }
 
-// tymczasowa funkcja do przycisku szczegółów 
+// funkcja pokazująca szczegóły konkretnej książki
 function pokazSzczegoly(id) {
-    console.log('kliknięto szczegóły książki o id:', id);
-    alert('Funkcja szczegółów w budowie! Wybrano ID: ' + id);
+    // szukamy książki w tablicy po jej id
+    const ksiazka = ksiazkiMock.find(k => k.id === id);
+
+    if (ksiazka) {
+        // podmieniamy teksty w HTML na dane z obiektu
+        document.getElementById('detale-tytul').innerText = ksiazka.tytul;
+        document.getElementById('detale-autor').innerText = ksiazka.autor;
+        document.getElementById('detale-opis').innerText = ksiazka.opis;
+
+        // przełączamy widok na szczegóły
+        pokazSekcje(sekcjaSzczegoly);
+    }
 }
 
+// obsługa formularza dodawania książki
+const formularz = document.getElementById('formularz-ksiazki');
+
+formularz.addEventListener('submit', (e) => {
+    e.preventDefault(); 
+
+    // tworzymy obiekt nowej książki
+    const nowaKsiazka = {
+        // generujemy tymczasowe id (później zrobi to prawdziwa baza z backendu)
+        id: Date.now(), 
+        tytul: document.getElementById('tytul').value.trim(),
+        autor: document.getElementById('autor').value.trim(),
+        opis: document.getElementById('opis').value.trim()
+    };
+
+    // wrzucamy do naszej tablicy
+    ksiazkiMock.push(nowaKsiazka);
+
+    // czyścimy pola formularza
+    formularz.reset(); 
+    
+    // przerysowujemy listę (żeby pokazać nową książkę)
+    renderujListeKsiazek();
+
+    // wracamy do głównego ekranu
+    pokazSekcje(sekcjaLista); 
+});
+
+// start aplikacji - pierwsze rysowanie listy
 renderujListeKsiazek();
