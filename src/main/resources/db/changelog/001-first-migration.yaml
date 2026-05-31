@@ -1,0 +1,117 @@
+databaseChangeLog:
+- changeSet:
+    id: create-tables
+    author: tymofii.salashnik
+    changes:
+    - createTable:
+        tableName: author
+        remarks: Books authors
+        columns:
+        - column:
+            name: id
+            type: bigint
+            remarks: Primary key
+            autoIncrement: true
+            constraints:
+              primaryKey: true
+              nullable: false
+        - column:
+            name: name
+            type: varchar(100)
+            remarks: Author's name
+            constraints:
+              nullable: false
+        - column:
+            name: biography
+            type: text
+            remarks: Author's biography
+    - createTable:
+        tableName: book
+        remarks: Books list
+        columns:
+        - column:
+            name: id
+            type: bigint
+            remarks: Primary key
+            autoIncrement: true
+            constraints:
+              primaryKey: true
+              nullable: false
+        - column:
+            name: name
+            type: varchar(255)
+            remarks: Book title
+            constraints:
+              nullable: false
+        - column:
+            name: rating
+            type: int
+            remarks: Book's rating
+        - column:
+            name: book_year
+            type: int
+            remarks: Year of publishing
+            constraints:
+              nullable: false
+    - createTable:
+        tableName: book_authors
+        remarks: link between books and authors
+        columns:
+        - column:
+            name: book_id
+            type: bigint
+            remarks: link to book
+            constraints:
+              nullable: false
+              referencedTableName: book
+              referencedColumnNames: id
+              foreignKeyName: fk_book_authors_book
+        - column:
+            name: author_id
+            type: bigint
+            remarks: link to author
+            constraints:
+              nullable: false
+              referencedTableName: author
+              referencedColumnNames: id
+              foreignKeyName: fk_book_authors_author
+        constraints:
+          primaryKey:
+            columnNames: book_id, author_id
+    - createTable:
+        tableName: book_review
+        remarks: user opinions about the books
+        columns:
+        - column:
+            name: id
+            type: bigint
+            remarks: Primary key
+            autoIncrement: true
+            constraints:
+              primaryKey: true
+              nullable: false
+        - column:
+            name: book_id
+            type: bigint
+            remarks: link to book
+            constraints:
+              nullable: false
+              referencedTableName: book
+              referencedColumnNames: id
+              foreignKeyName: fk_book_review_book
+        - column:
+            name: user_name
+            type: varchar(15)
+            remarks: User who made a comment
+            constraints:
+              nullable: false
+        - column:
+            name: grade
+            type: int
+            remarks: Grade of the book by user
+            constraints:
+              nullable: false
+        - column:
+            name: review_text
+            type: text
+            remarks: Text of the review

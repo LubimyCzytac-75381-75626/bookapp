@@ -1,2 +1,5 @@
-# Book-app-frontend
-75381- Oleksandr Mandziuk / 75626 - Tymofii Salashnik
+# Bookapp - frontend
+75381- Oleksandr Mandziuk 
+
+# Bookapp - backend
+75626 - Tymofii Salashnik
