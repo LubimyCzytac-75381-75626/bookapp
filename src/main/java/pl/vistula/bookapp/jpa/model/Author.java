@@ -35,12 +35,4 @@ public class Author {
 
     @Column(name = "biography")
     String biography;
-
-    // @ManyToMany
-    // @JoinTable(
-    //     name = "book_authors", 
-    //     joinColumns = @JoinColumn(name = "author_id"), 
-    //     inverseJoinColumns = @JoinColumn(name = "book_id"))
-    // @Builder.Default
-    // List<Book> books = new ArrayList<>();
 }
