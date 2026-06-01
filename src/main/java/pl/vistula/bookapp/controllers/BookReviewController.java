@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.extern.slf4j.Slf4j;
-import pl.vistula.bookapp.jpa.model.Book;
 import pl.vistula.bookapp.jpa.model.BookReview;
 import pl.vistula.bookapp.jpa.repository.BookReviewRepository;
 
