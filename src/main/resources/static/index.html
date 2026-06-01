@@ -8,17 +8,19 @@
 </head>
 <body>
 
-    <header class="glowny-header">
-        <div class="kontener header-wewnatrz">
-            <h1 class="logo">Katalog<span>Książek</span></h1>
-            <nav class="menu-glowne">
-                <button id="btn-lista" class="btn-menu">Katalog</button>
+    <nav class="nawigacja">
+        <div class="kontener nawigacja-wewnatrz">
+            <h1 class="logo">Katalog Książek</h1>
+            <div class="menu">
+                <button id="btn-lista" class="btn-menu">Wszystkie książki</button>
                 <button id="btn-dodaj" class="btn-akcja">Dodaj Książkę</button>
-            </nav>
+            </div>
         </div>
-    </header>
+    </nav>
 
-<section id="sekcja-lista" class="karta-zawartosci">
+    <main class="kontener" id="glowny-kontener">
+
+        <section id="sekcja-lista" class="karta-zawartosci">
             <h2 class="tytul-sekcji">Wszystkie Książki</h2>
             
             <div id="lista-ksiazek-kontener" class="siatka-ksiazek">
@@ -33,17 +35,22 @@
                     <input type="text" id="tytul" placeholder="np. Wiedźmin: Ostatnie życzenie" required>
                 </div>
 
-                <div class="form-grupa" id="kontener-autorow">
-                    <label>Autorzy</label>
-                    <div class="pole-autora">
-                        <input type="text" class="input-autor" placeholder="np. Andrzej Sapkowski" required>
-                        <button type="button" id="btn-dodaj-autora" class="btn-dodaj-autora">+</button>
-                    </div>
+                <div class="form-grupa">
+                    <label for="rok">Rok wydania</label>
+                    <input type="number" id="rok" placeholder="np. 2020" required>
                 </div>
 
                 <div class="form-grupa">
-                    <label for="opis">Opis fabuły</label>
-                    <textarea id="opis" rows="5" placeholder="Napisz krótko o czym jest ta książka..." required></textarea>
+                    <label for="ocena">Ocena (1-10)</label>
+                    <input type="number" id="ocena" min="1" max="10" placeholder="np. 9" required>
+                </div>
+
+                <div class="form-grupa">
+                    <label for="autor-select">Autor</label>
+                    <select id="autor-select" class="input-select" required>
+                        <option value="">-- wybierz autora z bazy --</option>
+                        </select>
+                    <span id="otworz-modal-autora" class="link-dodaj">Nie znalazłeś? Dodaj nowego autora</span>
                 </div>
 
                 <button type="submit" id="btn-zapisz" class="btn-akcja btn-duzy">Zapisz książkę</button>
@@ -51,18 +58,38 @@
         </section>
 
         <section id="sekcja-szczegoly" class="karta-zawartosci" style="display: none;">
-            <button id="btn-powrot" class="btn-szary">🔙 Powrót do katalogu</button>
+            <button id="btn-powrot" class="btn-menu" style="margin-bottom: 20px;">&larr; Powrót do listy</button>
             
-            <div class="szczegoly-ksiazki">
-                <div class="okladka-placeholder">Brak okładki</div>
-                <div class="info">
-                    <h2 id="detale-tytul" class="tytul-ksiazki">Tytuł Książki</h2>
-                    <h4 id="detale-autor" class="autor-ksiazki">Autor</h4>
-                    <p id="detale-opis" class="opis-ksiazki">Opis książki pojawi się tutaj...</p>
+            <div class="szczegoly-kontener">
+                <div class="szczegoly-okladka-duza">Brak okładki</div>
+                <div class="szczegoly-info">
+                    <h2 id="detale-tytul" class="tytul-sekcji" style="margin-bottom: 10px;">Tytuł</h2>
+                    <p style="color: #78b833; font-weight: bold; margin-bottom: 15px;">Autor: <span id="detale-autor">Autor</span></p>
+                    <p><strong>Rok wydania:</strong> <span id="detale-rok">2020</span></p>
+                    <p><strong>Ocena:</strong> <span id="detale-ocena">10</span>/10</p>
                 </div>
             </div>
         </section>
+
     </main>
+
+    <div id="modal-autor" class="modal-tlo" style="display: none;">
+        <div class="modal-tresc">
+            <span id="zamknij-modal" class="zamknij-btn">&times;</span>
+            <h2 class="tytul-sekcji">Dodaj autora</h2>
+            <form id="formularz-autora">
+                <div class="form-grupa">
+                    <label for="nowy-autor-nazwa">Imię i nazwisko</label>
+                    <input type="text" id="nowy-autor-nazwa" required>
+                </div>
+                <div class="form-grupa">
+                    <label for="nowy-autor-bio">Biografia</label>
+                    <textarea id="nowy-autor-bio" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn-akcja btn-duzy">Zapisz autora</button>
+            </form>
+        </div>
+    </div>
 
     <script src="app.js"></script>
 </body>
