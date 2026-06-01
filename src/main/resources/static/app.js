@@ -36,7 +36,6 @@ const modalAutor = document.getElementById('modal-autor');
 const btnOtworzModal = document.getElementById('otworz-modal-autora');
 const btnZamknijModal = document.getElementById('zamknij-modal');
 const formularzAutora = document.getElementById('formularz-autora');
-const selectAutor = document.getElementById('autor-select');
 
 // obsluga modala
 btnOtworzModal.addEventListener('click', () => {
@@ -47,24 +46,73 @@ btnZamknijModal.addEventListener('click', () => {
     modalAutor.style.display = 'none';
 });
 
-// pobieranie autorow z serwera
+let pobraniAutorzyWCache = [];
+
 function pobierzAutorow() {
     fetch('/author/')
         .then(res => res.json())
         .then(dane => {
-            selectAutor.innerHTML = '<option value="">-- wybierz autora z bazy --</option>';
-            
-            dane.forEach(autor => {
-                const opcja = document.createElement('option');
-                opcja.value = autor.id;
-                opcja.innerText = autor.name;
-                selectAutor.appendChild(opcja);
-            });
+            pobraniAutorzyWCache = dane;
+            odswiezWszystkieSelectyAutorow();
         })
         .catch(err => console.log('blad pobierania autorow', err));
 }
 
-// zapisywanie autora do bazy
+// funkcja aktualizujaca kazdego selecta na stronie
+function odswiezWszystkieSelectyAutorow() {
+    const wszystkieSelecty = document.querySelectorAll('.select-autor');
+    
+    wszystkieSelecty.forEach(select => {
+        const wybraneId = select.value;
+        
+        select.innerHTML = '<option value="">-- wybierz autora z bazy --</option>';
+        pobraniAutorzyWCache.forEach(autor => {
+            const opcja = document.createElement('option');
+            opcja.value = autor.id;
+            opcja.innerText = autor.name;
+            select.appendChild(opcja);
+        });
+        
+        if(wybraneId) {
+            select.value = wybraneId;
+        }
+    });
+}
+
+// obsluga przycisku dodawania kolejnego autora
+const btnDodajAutoraDoKsiazki = document.getElementById('btn-dodaj-autora');
+const kontenerAutorow = document.getElementById('kontener-autorow');
+
+btnDodajAutoraDoKsiazki.addEventListener('click', () => {
+    const nowyDiv = document.createElement('div');
+    nowyDiv.className = 'pole-autora';
+    
+    const nowySelect = document.createElement('select');
+    nowySelect.className = 'input-select select-autor';
+    nowySelect.required = true;
+    
+    nowySelect.innerHTML = '<option value="">-- wybierz autora z bazy --</option>';
+    pobraniAutorzyWCache.forEach(autor => {
+        const opcja = document.createElement('option');
+        opcja.value = autor.id;
+        opcja.innerText = autor.name;
+        nowySelect.appendChild(opcja);
+    });
+    
+    const btnMinus = document.createElement('button');
+    btnMinus.type = 'button';
+    btnMinus.className = 'btn-dodaj-autora btn-usun-autora';
+    btnMinus.innerText = '-';
+    btnMinus.addEventListener('click', () => {
+        nowyDiv.remove();
+    });
+    
+    nowyDiv.appendChild(nowySelect);
+    nowyDiv.appendChild(btnMinus);
+    kontenerAutorow.appendChild(nowyDiv);
+});
+
+// zapisywanie nowego autora do bazy
 formularzAutora.addEventListener('submit', (e) => {
     e.preventDefault();
 
@@ -90,7 +138,6 @@ formularzAutora.addEventListener('submit', (e) => {
     .catch(err => console.log('blad zapisu autora', err));
 });
 
-// glowna tablica ksiazek do pamietania danych na froncie
 let pobraneKsiazki = [];
 
 // pobieranie listy ksiazek
@@ -142,13 +189,21 @@ const formularzKsiazki = document.getElementById('formularz-ksiazki');
 formularzKsiazki.addEventListener('submit', (e) => {
     e.preventDefault();
 
-    const wybranyAutorId = document.getElementById('autor-select').value;
+    const selecty = document.querySelectorAll('.select-autor');
+    const tablicaAutorowId = [];
+    
+    selecty.forEach(select => {
+        const idWybrane = select.value;
+        if(idWybrane !== "") {
+            tablicaAutorowId.push({ id: parseInt(idWybrane) });
+        }
+    });
 
     const nowaKsiazka = {
         rating: parseInt(document.getElementById('ocena').value),
         name: document.getElementById('tytul').value.trim(),
         bookYear: parseInt(document.getElementById('rok').value),
-        authors: [{ id: parseInt(wybranyAutorId) }]
+        authors: tablicaAutorowId
     };
 
     fetch('/book/save', {
@@ -161,6 +216,12 @@ formularzKsiazki.addEventListener('submit', (e) => {
     .then(res => res.json())
     .then(() => {
         formularzKsiazki.reset();
+        
+        const wszystkiePola = document.querySelectorAll('.pole-autora');
+        for (let i = 1; i < wszystkiePola.length; i++) {
+            wszystkiePola[i].remove();
+        }
+
         pokazSekcje(sekcjaLista);
         pobierzKsiazki();
     })
@@ -186,5 +247,4 @@ window.pokazDetale = function(id) {
     }
 }
 
-// pierwsze ladowanie przy wejsciu na strone
 pobierzKsiazki();

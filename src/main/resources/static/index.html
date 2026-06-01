@@ -45,15 +45,18 @@
                     <input type="number" id="ocena" min="1" max="10" placeholder="np. 9" required>
                 </div>
 
-                <div class="form-grupa">
-                    <label for="autor-select">Autor</label>
-                    <select id="autor-select" class="input-select" required>
-                        <option value="">-- wybierz autora z bazy --</option>
-                        </select>
-                    <span id="otworz-modal-autora" class="link-dodaj">Nie znalazłeś? Dodaj nowego autora</span>
+                <div class="form-grupa" id="kontener-autorow">
+                    <label>Autorzy</label>
+                    <div class="pole-autora">
+                        <select class="input-select select-autor" required>
+                            <option value="">-- wybierz autora z bazy --</option>
+                            </select>
+                        <button type="button" id="btn-dodaj-autora" class="btn-dodaj-autora">+</button>
+                    </div>
                 </div>
+                <span id="otworz-modal-autora" class="link-dodaj">Nie znalazłeś? Dodaj nowego autora</span>
 
-                <button type="submit" id="btn-zapisz" class="btn-akcja btn-duzy">Zapisz książkę</button>
+                <button type="submit" id="btn-zapisz" class="btn-akcja btn-duzy" style="margin-top: 20px;">Zapisz książkę</button>
             </form>
         </section>
 
