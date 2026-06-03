@@ -1,9 +1,7 @@
-// elementy nawigacji
+// elementy nawigacji i sekcje
 const btnLista = document.getElementById('btn-lista');
 const btnDodaj = document.getElementById('btn-dodaj');
 const btnPowrot = document.getElementById('btn-powrot');
-
-// sekcje w html
 const sekcjaLista = document.getElementById('sekcja-lista');
 const sekcjaDodaj = document.getElementById('sekcja-dodaj');
 const sekcjaSzczegoly = document.getElementById('sekcja-szczegoly');
@@ -31,13 +29,12 @@ btnPowrot.addEventListener('click', () => {
     pokazSekcje(sekcjaLista);
 });
 
-// modal autora elementy
+// obsluga modala autora
 const modalAutor = document.getElementById('modal-autor');
 const btnOtworzModal = document.getElementById('otworz-modal-autora');
 const btnZamknijModal = document.getElementById('zamknij-modal');
 const formularzAutora = document.getElementById('formularz-autora');
 
-// obsluga modala
 btnOtworzModal.addEventListener('click', () => {
     modalAutor.style.display = 'flex';
 });
@@ -46,6 +43,7 @@ btnZamknijModal.addEventListener('click', () => {
     modalAutor.style.display = 'none';
 });
 
+// pobieranie autorow z serwera
 let pobraniAutorzyWCache = [];
 
 function pobierzAutorow() {
@@ -58,7 +56,7 @@ function pobierzAutorow() {
         .catch(err => console.log('blad pobierania autorow', err));
 }
 
-// funkcja aktualizujaca kazdego selecta na stronie
+// aktualizacja selectow autorow
 function odswiezWszystkieSelectyAutorow() {
     const wszystkieSelecty = document.querySelectorAll('.select-autor');
     
@@ -79,7 +77,7 @@ function odswiezWszystkieSelectyAutorow() {
     });
 }
 
-// obsluga przycisku dodawania kolejnego autora
+// dynamiczne dodawanie pol autorow w formularzu
 const btnDodajAutoraDoKsiazki = document.getElementById('btn-dodaj-autora');
 const kontenerAutorow = document.getElementById('kontener-autorow');
 
@@ -103,6 +101,7 @@ btnDodajAutoraDoKsiazki.addEventListener('click', () => {
     btnMinus.type = 'button';
     btnMinus.className = 'btn-dodaj-autora btn-usun-autora';
     btnMinus.innerText = '-';
+    
     btnMinus.addEventListener('click', () => {
         nowyDiv.remove();
     });
@@ -138,9 +137,9 @@ formularzAutora.addEventListener('submit', (e) => {
     .catch(err => console.log('blad zapisu autora', err));
 });
 
+// pobieranie listy ksiazek
 let pobraneKsiazki = [];
 
-// pobieranie listy ksiazek
 function pobierzKsiazki() {
     const kontener = document.getElementById('lista-ksiazek-kontener');
     kontener.innerHTML = '<p class="pusty-stan">Ładowanie...</p>';
@@ -228,11 +227,15 @@ formularzKsiazki.addEventListener('submit', (e) => {
     .catch(err => console.log('blad zapisu ksiazki', err));
 });
 
-// pokazywanie szczegolow wybranej ksiazki
+// pokazywanie szczegolow i przygotowanie do usuwania
+let aktualniePrzegladanaKsiazkaId = null;
+
 window.pokazDetale = function(id) {
     const ksiazka = pobraneKsiazki.find(k => k.id === id);
 
     if (ksiazka) {
+        aktualniePrzegladanaKsiazkaId = ksiazka.id;
+
         let nazwyAutorow = "Brak autora";
         if(ksiazka.authors && ksiazka.authors.length > 0) {
             nazwyAutorow = ksiazka.authors.map(a => a.name).join(', ');
@@ -247,4 +250,30 @@ window.pokazDetale = function(id) {
     }
 }
 
+// usuwanie ksiazki
+const btnUsunKsiazke = document.getElementById('btn-usun-ksiazke');
+
+btnUsunKsiazke.addEventListener('click', () => {
+    if (!aktualniePrzegladanaKsiazkaId) return;
+
+    const czyUsunac = confirm("Czy na pewno chcesz usunąć tę książkę z bazy?");
+    
+    if (czyUsunac) {
+        fetch(`/book/${aktualniePrzegladanaKsiazkaId}`, {
+            method: 'DELETE'
+        })
+        .then(res => {
+            if (res.ok) {
+                alert("Książka została usunięta.");
+                pokazSekcje(sekcjaLista);
+                pobierzKsiazki();
+            } else {
+                alert("Wystąpił błąd podczas usuwania.");
+            }
+        })
+        .catch(err => console.log('blad usuwania', err));
+    }
+});
+
+// start aplikacji
 pobierzKsiazki();
