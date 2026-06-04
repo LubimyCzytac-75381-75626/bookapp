@@ -1,4 +1,4 @@
-// elementy nawigacji i sekcje
+// nawigacja
 const btnLista = document.getElementById('btn-lista');
 const btnDodaj = document.getElementById('btn-dodaj');
 const btnPowrot = document.getElementById('btn-powrot');
@@ -6,7 +6,6 @@ const sekcjaLista = document.getElementById('sekcja-lista');
 const sekcjaDodaj = document.getElementById('sekcja-dodaj');
 const sekcjaSzczegoly = document.getElementById('sekcja-szczegoly');
 
-// logika przelaczania widokow
 function pokazSekcje(sekcja) {
     sekcjaLista.style.display = 'none';
     sekcjaDodaj.style.display = 'none';
@@ -14,7 +13,6 @@ function pokazSekcje(sekcja) {
     sekcja.style.display = 'block';
 }
 
-// zdarzenia dla menu
 btnLista.addEventListener('click', () => {
     pokazSekcje(sekcjaLista);
     pobierzKsiazki();
@@ -29,7 +27,7 @@ btnPowrot.addEventListener('click', () => {
     pokazSekcje(sekcjaLista);
 });
 
-// obsluga modala autora
+// modal autora
 const modalAutor = document.getElementById('modal-autor');
 const btnOtworzModal = document.getElementById('otworz-modal-autora');
 const btnZamknijModal = document.getElementById('zamknij-modal');
@@ -43,7 +41,7 @@ btnZamknijModal.addEventListener('click', () => {
     modalAutor.style.display = 'none';
 });
 
-// pobieranie autorow z serwera
+// pobieranie autorow
 let pobraniAutorzyWCache = [];
 
 function pobierzAutorow() {
@@ -56,14 +54,13 @@ function pobierzAutorow() {
         .catch(err => console.log('blad pobierania autorow', err));
 }
 
-// aktualizacja selectow autorow
 function odswiezWszystkieSelectyAutorow() {
     const wszystkieSelecty = document.querySelectorAll('.select-autor');
     
     wszystkieSelecty.forEach(select => {
         const wybraneId = select.value;
         
-        select.innerHTML = '<option value="">-- wybierz autora z bazy --</option>';
+        select.innerHTML = '<option value="">Wpisz przynajmniej 3 znaki (wybierz)</option>';
         pobraniAutorzyWCache.forEach(autor => {
             const opcja = document.createElement('option');
             opcja.value = autor.id;
@@ -77,7 +74,7 @@ function odswiezWszystkieSelectyAutorow() {
     });
 }
 
-// dynamiczne dodawanie pol autorow w formularzu
+// dynamiczne pola autorow
 const btnDodajAutoraDoKsiazki = document.getElementById('btn-dodaj-autora');
 const kontenerAutorow = document.getElementById('kontener-autorow');
 
@@ -89,7 +86,7 @@ btnDodajAutoraDoKsiazki.addEventListener('click', () => {
     nowySelect.className = 'input-select select-autor';
     nowySelect.required = true;
     
-    nowySelect.innerHTML = '<option value="">-- wybierz autora z bazy --</option>';
+    nowySelect.innerHTML = '<option value="">Wpisz przynajmniej 3 znaki (wybierz)</option>';
     pobraniAutorzyWCache.forEach(autor => {
         const opcja = document.createElement('option');
         opcja.value = autor.id;
@@ -111,7 +108,7 @@ btnDodajAutoraDoKsiazki.addEventListener('click', () => {
     kontenerAutorow.appendChild(nowyDiv);
 });
 
-// zapisywanie nowego autora do bazy
+// zapis nowego autora
 formularzAutora.addEventListener('submit', (e) => {
     e.preventDefault();
 
@@ -137,7 +134,7 @@ formularzAutora.addEventListener('submit', (e) => {
     .catch(err => console.log('blad zapisu autora', err));
 });
 
-// pobieranie listy ksiazek
+// pobieranie ksiazek
 let pobraneKsiazki = [];
 
 function pobierzKsiazki() {
@@ -182,7 +179,7 @@ function pobierzKsiazki() {
         });
 }
 
-// zapisywanie nowej ksiazki
+// zapis ksiazki (ocena to zawsze 0 na start, bo zalezy od recenzji)
 const formularzKsiazki = document.getElementById('formularz-ksiazki');
 
 formularzKsiazki.addEventListener('submit', (e) => {
@@ -199,7 +196,7 @@ formularzKsiazki.addEventListener('submit', (e) => {
     });
 
     const nowaKsiazka = {
-        rating: parseInt(document.getElementById('ocena').value),
+        rating: 0, 
         name: document.getElementById('tytul').value.trim(),
         bookYear: parseInt(document.getElementById('rok').value),
         authors: tablicaAutorowId
@@ -227,7 +224,7 @@ formularzKsiazki.addEventListener('submit', (e) => {
     .catch(err => console.log('blad zapisu ksiazki', err));
 });
 
-// pokazywanie szczegolow i przygotowanie do usuwania
+// szczegoly i recenzje
 let aktualniePrzegladanaKsiazkaId = null;
 
 window.pokazDetale = function(id) {
@@ -244,11 +241,82 @@ window.pokazDetale = function(id) {
         document.getElementById('detale-tytul').innerText = ksiazka.name;
         document.getElementById('detale-autor').innerText = nazwyAutorow;
         document.getElementById('detale-rok').innerText = ksiazka.bookYear;
-        document.getElementById('detale-ocena').innerText = ksiazka.rating;
-
+        
         pokazSekcje(sekcjaSzczegoly);
+        
+        pobierzRecenzje(id);
     }
 }
+
+// pobieranie i wyliczanie sredniej z recenzji
+function pobierzRecenzje(bookId) {
+    const kontener = document.getElementById('lista-recenzji');
+    kontener.innerHTML = '<p class="pusty-stan">Ładowanie recenzji...</p>';
+
+    fetch(`/book-review/?bookId=${bookId}`)
+        .then(res => res.json())
+        .then(dane => {
+            kontener.innerHTML = '';
+            
+            if(dane.length === 0) {
+                kontener.innerHTML = '<p class="pusty-stan">Nikt jeszcze nie ocenił tej książki. Bądź pierwszy!</p>';
+                document.getElementById('detale-ocena').innerText = "Brak ocen";
+                return;
+            }
+
+            let sumaOcen = 0;
+
+            dane.forEach(recenzja => {
+                sumaOcen += recenzja.grade;
+                const karta = document.createElement('div');
+                karta.className = 'karta-recenzji';
+                karta.innerHTML = `
+                    <div class="recenzja-naglowek">
+                        <span class="recenzja-autor">${recenzja.userName}</span>
+                        <span class="recenzja-ocena">${recenzja.grade}/10</span>
+                    </div>
+                    <div class="recenzja-tekst">"${recenzja.reviewText}"</div>
+                `;
+                kontener.appendChild(karta);
+            });
+
+            const srednia = (sumaOcen / dane.length).toFixed(1);
+            document.getElementById('detale-ocena').innerText = `${srednia}/10`;
+        })
+        .catch(err => {
+            console.log('blad pobierania recenzji', err);
+            kontener.innerHTML = '<p class="pusty-stan">Błąd ładowania recenzji.</p>';
+        });
+}
+
+// zapisywanie nowej recenzji
+const formularzRecenzji = document.getElementById('formularz-recenzji');
+
+formularzRecenzji.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if(!aktualniePrzegladanaKsiazkaId) return;
+
+    const nowaRecenzja = {
+        book: { id: aktualniePrzegladanaKsiazkaId },
+        userName: document.getElementById('recenzja-autor').value.trim(),
+        grade: parseInt(document.getElementById('recenzja-ocena').value),
+        reviewText: document.getElementById('recenzja-tekst').value.trim()
+    };
+
+    fetch('/book-review/save', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(nowaRecenzja)
+    })
+    .then(res => res.json())
+    .then(() => {
+        formularzRecenzji.reset();
+        pobierzRecenzje(aktualniePrzegladanaKsiazkaId);
+    })
+    .catch(err => console.log('blad zapisu recenzji', err));
+});
 
 // usuwanie ksiazki
 const btnUsunKsiazke = document.getElementById('btn-usun-ksiazke');

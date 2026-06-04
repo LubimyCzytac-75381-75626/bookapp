@@ -22,42 +22,52 @@
 
         <section id="sekcja-lista" class="karta-zawartosci">
             <h2 class="tytul-sekcji">Wszystkie Książki</h2>
-            
             <div id="lista-ksiazek-kontener" class="siatka-ksiazek">
-                </div>
+            </div>
         </section>
 
         <section id="sekcja-dodaj" class="karta-zawartosci" style="display: none;">
-            <h2 class="tytul-sekcji">Dodaj nową książkę do bazy</h2>
-            <form id="formularz-ksiazki">
-                <div class="form-grupa">
-                    <label for="tytul">Tytuł książki</label>
-                    <input type="text" id="tytul" placeholder="np. Wiedźmin: Ostatnie życzenie" required>
-                </div>
-
-                <div class="form-grupa">
-                    <label for="rok">Rok wydania</label>
-                    <input type="number" id="rok" placeholder="np. 2020" required>
-                </div>
-
-                <div class="form-grupa">
-                    <label for="ocena">Ocena (1-10)</label>
-                    <input type="number" id="ocena" min="1" max="10" placeholder="np. 9" required>
-                </div>
-
-                <div class="form-grupa" id="kontener-autorow">
-                    <label>Autorzy</label>
-                    <div class="pole-autora">
-                        <select class="input-select select-autor" required>
-                            <option value="">-- wybierz autora z bazy --</option>
-                            </select>
-                        <button type="button" id="btn-dodaj-autora" class="btn-dodaj-autora">+</button>
+            <div class="dodaj-ksiazke-uklad">
+                <div class="dodaj-okladke-kolumna">
+                    <div class="okladka-placeholder">
+                        <span style="color: #e67e22; font-weight: 500; font-size: 18px;">Dodaj<br>okładkę</span>
                     </div>
+                    <p class="okladka-info">Maksymalny<br>rozmiar pliku 1MB<br><span style="color: #adb5bd; font-size: 16px;">JPG</span></p>
                 </div>
-                <span id="otworz-modal-autora" class="link-dodaj">Nie znalazłeś? Dodaj nowego autora</span>
+                
+                <div class="formularz-kolumna">
+                    <form id="formularz-ksiazki">
+                        <div class="form-grupa">
+                            <label for="tytul">Tytuł książki <span style="color:#d9534f">*</span></label>
+                            <input type="text" id="tytul" placeholder="Wpisz przynajmniej 2 znaki" required>
+                        </div>
 
-                <button type="submit" id="btn-zapisz" class="btn-akcja btn-duzy" style="margin-top: 20px;">Zapisz książkę</button>
-            </form>
+                        <div class="form-grupa">
+                            <label for="rok">Rok wydania <span style="color:#d9534f">*</span></label>
+                            <input type="number" id="rok" placeholder="np. 2020" required>
+                        </div>
+
+                        <div class="form-grupa" id="kontener-autorow">
+                            <label>Autor <span style="color:#d9534f">*</span></label>
+                            <div class="pole-autora">
+                                <select class="input-select select-autor" required>
+                                    <option value="">-- wybierz autora z bazy --</option>
+                                </select>
+                                <button type="button" id="btn-dodaj-autora" class="btn-dodaj-autora">+</button>
+                            </div>
+                        </div>
+                        <span id="otworz-modal-autora" class="link-dodaj">Nie znalazłeś? Dodaj nowego autora</span>
+
+                        <div class="form-grupa" style="margin-top: 20px;">
+                            <label for="kategoria">Kategoria <span style="color:#d9534f">*</span></label>
+                            <input type="text" id="kategoria" placeholder="Wpisz przynajmniej 3 znaki" required>
+                            <span class="link-dodaj" style="color: #6a7482; text-decoration: none;">Wszystkie kategorie</span>
+                        </div>
+
+                        <button type="submit" id="btn-zapisz" class="btn-akcja btn-duzy" style="margin-top: 30px;">Zapisz książkę</button>
+                    </form>
+                </div>
+            </div>
         </section>
 
         <section id="sekcja-szczegoly" class="karta-zawartosci" style="display: none;">
@@ -72,8 +82,30 @@
                     <h2 id="detale-tytul" class="tytul-sekcji" style="margin-bottom: 10px;">Tytuł</h2>
                     <p style="color: #78b833; font-weight: bold; margin-bottom: 15px;">Autor: <span id="detale-autor">Autor</span></p>
                     <p><strong>Rok wydania:</strong> <span id="detale-rok">2020</span></p>
-                    <p><strong>Ocena:</strong> <span id="detale-ocena">10</span>/10</p>
+                    <p><strong>Średnia ocena:</strong> <span id="detale-ocena" style="color: #e67e22; font-weight: bold; font-size: 18px;">Ładowanie...</span></p>
                 </div>
+            </div>
+
+            <hr style="margin: 40px 0 20px 0; border: 0; border-top: 1px solid #eaeaea;">
+            <h3 class="tytul-sekcji">Recenzje czytelników</h3>
+            
+            <div id="lista-recenzji" style="margin-bottom: 30px;">
+            </div>
+
+            <div class="dodaj-recenzje-blok">
+                <h4 style="margin-bottom: 15px;">Dodaj swoją recenzję</h4>
+                <form id="formularz-recenzji">
+                    <div class="form-grupa">
+                        <input type="text" id="recenzja-autor" placeholder="Twoje imię / nick" required style="border: 1px solid #ddd; padding: 10px;">
+                    </div>
+                    <div class="form-grupa">
+                        <input type="number" id="recenzja-ocena" min="1" max="10" placeholder="Twoja ocena (1-10)" required style="border: 1px solid #ddd; padding: 10px;">
+                    </div>
+                    <div class="form-grupa">
+                        <textarea id="recenzja-tekst" rows="3" placeholder="Napisz co myślisz o tej książce..." required style="border: 1px solid #ddd; padding: 10px;"></textarea>
+                    </div>
+                    <button type="submit" class="btn-akcja">Zapisz recenzję</button>
+                </form>
             </div>
         </section>
 
@@ -86,11 +118,11 @@
             <form id="formularz-autora">
                 <div class="form-grupa">
                     <label for="nowy-autor-nazwa">Imię i nazwisko</label>
-                    <input type="text" id="nowy-autor-nazwa" required>
+                    <input type="text" id="nowy-autor-nazwa" required style="border: 1px solid #ddd; padding: 10px;">
                 </div>
                 <div class="form-grupa">
                     <label for="nowy-autor-bio">Biografia</label>
-                    <textarea id="nowy-autor-bio" rows="3"></textarea>
+                    <textarea id="nowy-autor-bio" rows="3" style="border: 1px solid #ddd; padding: 10px;"></textarea>
                 </div>
                 <button type="submit" class="btn-akcja btn-duzy">Zapisz autora</button>
             </form>
