@@ -47,21 +47,18 @@
                             <input type="number" id="rok" placeholder="np. 2020" required>
                         </div>
 
-                        <div class="form-grupa" id="kontener-autorow">
+                        <div class="form-grupa">
                             <label>Autor <span style="color:#d9534f">*</span></label>
-                            <div class="pole-autora">
-                                <select class="input-select select-autor" required>
-                                    <option value="">-- wybierz autora z bazy --</option>
-                                </select>
-                                <button type="button" id="btn-dodaj-autora" class="btn-dodaj-autora">+</button>
+                            <div id="kontener-autorow">
                             </div>
+                            <span id="otworz-modal-autora" class="link-dodaj">Nie znalazłeś? Dodaj nowego autora</span>
                         </div>
-                        <span id="otworz-modal-autora" class="link-dodaj">Nie znalazłeś? Dodaj nowego autora</span>
 
-                        <div class="form-grupa" style="margin-top: 20px;">
-                            <label for="kategoria">Kategoria <span style="color:#d9534f">*</span></label>
-                            <input type="text" id="kategoria" placeholder="Wpisz przynajmniej 3 znaki" required>
-                            <span class="link-dodaj" style="color: #6a7482; text-decoration: none;">Wszystkie kategorie</span>
+                        <div class="form-grupa" style="margin-top: 25px;">
+                            <label>Kategoria <span style="color:#d9534f">*</span></label>
+                            <div id="kontener-kategorii">
+                            </div>
+                            <span class="link-dodaj" style="color: #6a7482; text-decoration: none; cursor: default;">Wszystkie kategorie z bazy</span>
                         </div>
 
                         <button type="submit" id="btn-zapisz" class="btn-akcja btn-duzy" style="margin-top: 30px;">Zapisz książkę</button>
@@ -80,7 +77,8 @@
                 <div class="szczegoly-okladka-duza">Brak okładki</div>
                 <div class="szczegoly-info">
                     <h2 id="detale-tytul" class="tytul-sekcji" style="margin-bottom: 10px;">Tytuł</h2>
-                    <p style="color: #78b833; font-weight: bold; margin-bottom: 15px;">Autor: <span id="detale-autor">Autor</span></p>
+                    <p style="color: #78b833; font-weight: bold; margin-bottom: 5px;">Autor: <span id="detale-autor">Autor</span></p>
+                    <p style="color: #6a7482; margin-bottom: 15px;">Kategorie: <span id="detale-kategorie">Brak</span></p>
                     <p><strong>Rok wydania:</strong> <span id="detale-rok">2020</span></p>
                     <p><strong>Średnia ocena:</strong> <span id="detale-ocena" style="color: #e67e22; font-weight: bold; font-size: 18px;">Ładowanie...</span></p>
                 </div>
@@ -95,10 +93,10 @@
             <div class="dodaj-recenzje-blok">
                 <h4 style="margin-bottom: 15px;">Dodaj swoją recenzję</h4>
                 <form id="formularz-recenzji">
-                    <div class="form-grupa">
+                    <div class="form-grupa" style="margin-bottom: 15px;">
                         <input type="text" id="recenzja-autor" placeholder="Twoje imię / nick" required style="border: 1px solid #ddd; padding: 10px;">
                     </div>
-                    <div class="form-grupa">
+                    <div class="form-grupa" style="margin-bottom: 15px;">
                         <input type="number" id="recenzja-ocena" min="1" max="10" placeholder="Twoja ocena (1-10)" required style="border: 1px solid #ddd; padding: 10px;">
                     </div>
                     <div class="form-grupa">

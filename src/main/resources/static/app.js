@@ -1,4 +1,3 @@
-// nawigacja
 const btnLista = document.getElementById('btn-lista');
 const btnDodaj = document.getElementById('btn-dodaj');
 const btnPowrot = document.getElementById('btn-powrot');
@@ -20,14 +19,13 @@ btnLista.addEventListener('click', () => {
 
 btnDodaj.addEventListener('click', () => {
     pokazSekcje(sekcjaDodaj);
-    pobierzAutorow();
+    inicjalizujPolaDynamiczne();
 });
 
 btnPowrot.addEventListener('click', () => {
     pokazSekcje(sekcjaLista);
 });
 
-// modal autora
 const modalAutor = document.getElementById('modal-autor');
 const btnOtworzModal = document.getElementById('otworz-modal-autora');
 const btnZamknijModal = document.getElementById('zamknij-modal');
@@ -41,74 +39,152 @@ btnZamknijModal.addEventListener('click', () => {
     modalAutor.style.display = 'none';
 });
 
-// pobieranie autorow
 let pobraniAutorzyWCache = [];
+let pobraneKategorieWCache = [];
 
-function pobierzAutorow() {
+function pobierzDaneDoSlownikow() {
     fetch('/author/')
         .then(res => res.json())
         .then(dane => {
             pobraniAutorzyWCache = dane;
-            odswiezWszystkieSelectyAutorow();
         })
         .catch(err => console.log('blad pobierania autorow', err));
+
+    fetch('/category/')
+        .then(res => {
+            if(!res.ok) throw new Error('Brak endpointu');
+            return res.json();
+        })
+        .then(dane => {
+            pobraneKategorieWCache = dane;
+        })
+        .catch(() => {
+            pobraneKategorieWCache = [
+                { id: 1, name: "Fantastyka" },
+                { id: 2, name: "Kryminał" },
+                { id: 3, name: "Romans" },
+                { id: 4, name: "Thriller" },
+                { id: 5, name: "Biografia" }
+            ];
+        });
 }
 
-function odswiezWszystkieSelectyAutorow() {
-    const wszystkieSelecty = document.querySelectorAll('.select-autor');
+function inicjalizujPolaDynamiczne() {
+    const kontenerAutorow = document.getElementById('kontener-autorow');
+    const kontenerKategorii = document.getElementById('kontener-kategorii');
     
-    wszystkieSelecty.forEach(select => {
-        const wybraneId = select.value;
-        
-        select.innerHTML = '<option value="">Wpisz przynajmniej 3 znaki (wybierz)</option>';
-        pobraniAutorzyWCache.forEach(autor => {
-            const opcja = document.createElement('option');
-            opcja.value = autor.id;
-            opcja.innerText = autor.name;
-            select.appendChild(opcja);
+    kontenerAutorow.innerHTML = '';
+    kontenerKategorii.innerHTML = '';
+
+    dodajPoleAutocomplete(kontenerAutorow, pobraniAutorzyWCache, 'autor-wybrany-id', 'Wpisz min. 3 znaki lub kliknij...', true);
+    dodajPoleAutocomplete(kontenerKategorii, pobraneKategorieWCache, 'kategoria-wybrana-id', 'Wpisz min. 3 znaki lub kliknij...', true);
+}
+
+function dodajPoleAutocomplete(kontener, daneZrodlowe, nazwaKlasyId, placeholderTekst, czyPierwsze) {
+    const wiersz = document.createElement('div');
+    wiersz.className = 'dynamiczny-wiersz';
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'autocomplete-wrapper';
+
+    const inputTekstowy = document.createElement('input');
+    inputTekstowy.type = 'text';
+    inputTekstowy.placeholder = placeholderTekst;
+    inputTekstowy.required = true;
+    inputTekstowy.autocomplete = 'off';
+
+    const ukrytyInputId = document.createElement('input');
+    ukrytyInputId.type = 'hidden';
+    ukrytyInputId.className = nazwaKlasyId;
+
+    const listaPodpowiedzi = document.createElement('div');
+    listaPodpowiedzi.className = 'autocomplete-lista';
+    listaPodpowiedzi.style.display = 'none';
+
+    wrapper.appendChild(inputTekstowy);
+    wrapper.appendChild(ukrytyInputId);
+    wrapper.appendChild(listaPodpowiedzi);
+
+    const btnAkcja = document.createElement('button');
+    btnAkcja.type = 'button';
+    
+    if (czyPierwsze) {
+        btnAkcja.className = 'btn-dynamiczny';
+        btnAkcja.innerText = '+';
+        btnAkcja.addEventListener('click', () => {
+            dodajPoleAutocomplete(kontener, daneZrodlowe, nazwaKlasyId, placeholderTekst, false);
         });
+    } else {
+        btnAkcja.className = 'btn-dynamiczny btn-usun-dynamiczny';
+        btnAkcja.innerText = '-';
+        btnAkcja.addEventListener('click', () => {
+            wiersz.remove();
+        });
+    }
+
+    wiersz.appendChild(wrapper);
+    wiersz.appendChild(btnAkcja);
+    kontener.appendChild(wiersz);
+
+    konfigurujZachowanieAutocomplete(inputTekstowy, ukrytyInputId, listaPodpowiedzi, daneZrodlowe);
+}
+
+function konfigurujZachowanieAutocomplete(input, ukryteId, lista, dane) {
+    input.addEventListener('focus', () => {
+        renderujListeAutocomplete(lista, dane, input, ukryteId);
+        lista.style.display = 'block';
+    });
+
+    input.addEventListener('input', () => {
+        ukryteId.value = '';
+        const wpisane = input.value.toLowerCase();
         
-        if(wybraneId) {
-            select.value = wybraneId;
+        if (wpisane.length === 0) {
+            renderujListeAutocomplete(lista, dane, input, ukryteId);
+            return;
+        }
+
+        if (wpisane.length > 0 && wpisane.length < 3) {
+            lista.innerHTML = '<div class="autocomplete-pusty">Wpisz minimum 3 znaki...</div>';
+            lista.style.display = 'block';
+            return;
+        }
+
+        const przefiltrowane = dane.filter(el => el.name.toLowerCase().includes(wpisane));
+        renderujListeAutocomplete(lista, przefiltrowane, input, ukryteId);
+    });
+
+    document.addEventListener('click', (e) => {
+        if (e.target !== input && e.target !== lista) {
+            lista.style.display = 'none';
         }
     });
 }
 
-// dynamiczne pola autorow
-const btnDodajAutoraDoKsiazki = document.getElementById('btn-dodaj-autora');
-const kontenerAutorow = document.getElementById('kontener-autorow');
+function renderujListeAutocomplete(listaElement, dane, inputElement, ukryteIdElement) {
+    listaElement.innerHTML = '';
+    
+    if (dane.length === 0) {
+        listaElement.innerHTML = '<div class="autocomplete-pusty">Brak wyników w bazie.</div>';
+        return;
+    }
 
-btnDodajAutoraDoKsiazki.addEventListener('click', () => {
-    const nowyDiv = document.createElement('div');
-    nowyDiv.className = 'pole-autora';
-    
-    const nowySelect = document.createElement('select');
-    nowySelect.className = 'input-select select-autor';
-    nowySelect.required = true;
-    
-    nowySelect.innerHTML = '<option value="">Wpisz przynajmniej 3 znaki (wybierz)</option>';
-    pobraniAutorzyWCache.forEach(autor => {
-        const opcja = document.createElement('option');
-        opcja.value = autor.id;
-        opcja.innerText = autor.name;
-        nowySelect.appendChild(opcja);
+    dane.forEach(el => {
+        const item = document.createElement('div');
+        item.className = 'autocomplete-item';
+        item.innerText = `${el.name} (id ${el.id})`;
+        
+        item.addEventListener('click', (e) => {
+            e.stopPropagation();
+            inputElement.value = el.name;
+            ukryteIdElement.value = el.id;
+            listaElement.style.display = 'none';
+        });
+        
+        listaElement.appendChild(item);
     });
-    
-    const btnMinus = document.createElement('button');
-    btnMinus.type = 'button';
-    btnMinus.className = 'btn-dodaj-autora btn-usun-autora';
-    btnMinus.innerText = '-';
-    
-    btnMinus.addEventListener('click', () => {
-        nowyDiv.remove();
-    });
-    
-    nowyDiv.appendChild(nowySelect);
-    nowyDiv.appendChild(btnMinus);
-    kontenerAutorow.appendChild(nowyDiv);
-});
+}
 
-// zapis nowego autora
 formularzAutora.addEventListener('submit', (e) => {
     e.preventDefault();
 
@@ -128,13 +204,12 @@ formularzAutora.addEventListener('submit', (e) => {
     .then(() => {
         modalAutor.style.display = 'none';
         formularzAutora.reset();
-        pobierzAutorow();
+        pobierzDaneDoSlownikow();
         alert('Autor został dodany do bazy!');
     })
     .catch(err => console.log('blad zapisu autora', err));
 });
 
-// pobieranie ksiazek
 let pobraneKsiazki = [];
 
 function pobierzKsiazki() {
@@ -179,27 +254,34 @@ function pobierzKsiazki() {
         });
 }
 
-// zapis ksiazki (ocena to zawsze 0 na start, bo zalezy od recenzji)
 const formularzKsiazki = document.getElementById('formularz-ksiazki');
 
 formularzKsiazki.addEventListener('submit', (e) => {
     e.preventDefault();
 
-    const selecty = document.querySelectorAll('.select-autor');
-    const tablicaAutorowId = [];
-    
-    selecty.forEach(select => {
-        const idWybrane = select.value;
-        if(idWybrane !== "") {
-            tablicaAutorowId.push({ id: parseInt(idWybrane) });
-        }
+    const ukryteAutorzyId = document.querySelectorAll('.autor-wybrany-id');
+    const tablicaAutorow = [];
+    ukryteAutorzyId.forEach(input => {
+        if(input.value) tablicaAutorow.push({ id: parseInt(input.value) });
     });
+
+    const ukryteKategorieId = document.querySelectorAll('.kategoria-wybrana-id');
+    const tablicaKategorii = [];
+    ukryteKategorieId.forEach(input => {
+        if(input.value) tablicaKategorii.push({ id: parseInt(input.value) });
+    });
+
+    if(tablicaAutorow.length === 0) {
+        alert("Musisz wybrać autora z listy!");
+        return;
+    }
 
     const nowaKsiazka = {
         rating: 0, 
         name: document.getElementById('tytul').value.trim(),
         bookYear: parseInt(document.getElementById('rok').value),
-        authors: tablicaAutorowId
+        authors: tablicaAutorow,
+        categories: tablicaKategorii
     };
 
     fetch('/book/save', {
@@ -212,19 +294,12 @@ formularzKsiazki.addEventListener('submit', (e) => {
     .then(res => res.json())
     .then(() => {
         formularzKsiazki.reset();
-        
-        const wszystkiePola = document.querySelectorAll('.pole-autora');
-        for (let i = 1; i < wszystkiePola.length; i++) {
-            wszystkiePola[i].remove();
-        }
-
         pokazSekcje(sekcjaLista);
         pobierzKsiazki();
     })
     .catch(err => console.log('blad zapisu ksiazki', err));
 });
 
-// szczegoly i recenzje
 let aktualniePrzegladanaKsiazkaId = null;
 
 window.pokazDetale = function(id) {
@@ -238,17 +313,21 @@ window.pokazDetale = function(id) {
             nazwyAutorow = ksiazka.authors.map(a => a.name).join(', ');
         }
 
+        let nazwyKategorii = "Brak";
+        if(ksiazka.categories && ksiazka.categories.length > 0) {
+            nazwyKategorii = ksiazka.categories.map(c => c.name).join(', ');
+        }
+
         document.getElementById('detale-tytul').innerText = ksiazka.name;
         document.getElementById('detale-autor').innerText = nazwyAutorow;
+        document.getElementById('detale-kategorie').innerText = nazwyKategorii;
         document.getElementById('detale-rok').innerText = ksiazka.bookYear;
         
         pokazSekcje(sekcjaSzczegoly);
-        
         pobierzRecenzje(id);
     }
 }
 
-// pobieranie i wyliczanie sredniej z recenzji
 function pobierzRecenzje(bookId) {
     const kontener = document.getElementById('lista-recenzji');
     kontener.innerHTML = '<p class="pusty-stan">Ładowanie recenzji...</p>';
@@ -289,7 +368,6 @@ function pobierzRecenzje(bookId) {
         });
 }
 
-// zapisywanie nowej recenzji
 const formularzRecenzji = document.getElementById('formularz-recenzji');
 
 formularzRecenzji.addEventListener('submit', (e) => {
@@ -318,7 +396,6 @@ formularzRecenzji.addEventListener('submit', (e) => {
     .catch(err => console.log('blad zapisu recenzji', err));
 });
 
-// usuwanie ksiazki
 const btnUsunKsiazke = document.getElementById('btn-usun-ksiazke');
 
 btnUsunKsiazke.addEventListener('click', () => {
@@ -343,5 +420,5 @@ btnUsunKsiazke.addEventListener('click', () => {
     }
 });
 
-// start aplikacji
+pobierzDaneDoSlownikow();
 pobierzKsiazki();
