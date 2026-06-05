@@ -1,0 +1,52 @@
+databaseChangeLog:
+- changeSet:
+    id: add-categories
+    author: tymofii.salashnik
+    changes:
+    - createTable:
+        tableName: category
+        remarks: Categories of books
+        columns:
+        - column:
+            name: id
+            type: bigint
+            remarks: Primary key
+            autoIncrement: true
+            constraints:
+              primaryKey: true
+              nullable: false
+        - column:
+            name: name
+            type: varchar(255)
+            remarks: Category name
+            constraints:
+              nullable: false
+- changeSet:
+    id: add-category-to-book
+    author: tymofii.salashnik
+    changes:
+    - createTable:
+        tableName: book_categories
+        remarks: link between books and categories
+        columns:
+        - column:
+            name: book_id
+            type: bigint
+            remarks: link to book
+            constraints:
+              nullable: false
+              referencedTableName: book
+              referencedColumnNames: id
+              foreignKeyName: fk_book_categories_book
+        - column:
+            name: category_id
+            type: bigint
+            remarks: link to category
+            constraints:
+              nullable: false
+              referencedTableName: category
+              referencedColumnNames: id
+              foreignKeyName: fk_book_categories_category
+        constraints:
+          primaryKey:
+            columnNames: book_id, category_id
