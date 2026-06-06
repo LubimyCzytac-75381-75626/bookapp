@@ -55,4 +55,13 @@ public class Book {
     @NotEmpty(message = "Book must have at least one author")
     List<Author> authors = new ArrayList<>();
 
+    @ManyToMany
+    @JoinTable(
+        name = "book_categories", 
+        joinColumns = @JoinColumn(name = "book_id"), 
+        inverseJoinColumns = @JoinColumn(name = "category_id"))
+    @Builder.Default
+    @NotEmpty(message = "Book must have at least one category")
+    List<Category> categories = new ArrayList<>();
+
 }

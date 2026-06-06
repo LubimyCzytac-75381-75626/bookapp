@@ -39,10 +39,24 @@ java -jar ./target/bookapp-0.0.1-SNAPSHOT.jar
 ```
 * Usunięcie autora: DELETE /author/{id}, gdzie {id} to identyfikator autora
 
+### Kategorii:
+
+* Lista wszystkich kategorii: GET /categories/
+* Odczyt konkretnej kategorii: GET /category/{id}, gdzie {id} to identyfikator kategorii
+* Utworzenie/aktualizacja kategorii: POST /category/save  z treścią żądania w formacie (jeśli pole id nie jest podane w JSON-ie, zostanie utworzony nowa kategoria; jeśli jest podana, istniejąca kategoria zostanie zaktualizowana)
+```
+{
+    "id": 2,
+    "name": "Kategoria 1",
+}
+```
+* Usunięcie kategorii: DELETE /category/{id}, gdzie {id} to identyfikator kategorii
+
 ### Książki:
 
 * Lista wszystkich książek: GET /book/
 * Lista wszystkich książek danego autora : GET /book/?authorId={id} gdzie {id} to identyfikator autora
+* Lista wszystkich książek danej kategorii : GET /book/?categoryId={id} gdzie {id} to identyfikator kategorii
 * Odczyt konkretnej książki: GET /book/{id}, gdzie {id} to identyfikator książki
 * Utworzenie/aktualizacja książki: POST /book/save z treścią żądania w formacie (jeśli pole id nie jest podane w JSON-ie, zostanie utworzona nowa książka; jeśli jest podane, istniejąca książka zostanie zaktualizowana)
 ```
@@ -51,6 +65,7 @@ java -jar ./target/bookapp-0.0.1-SNAPSHOT.jar
 	"name": "Very Interesting Book!",
 	"bookYear": 2020,
 	"authors":[{"id":1}]
+	"categories":[{"id":2}]
 }
 ```
 * Usunięcie książki: DELETE /book/{id},gdzie {id} to identyfikator książki

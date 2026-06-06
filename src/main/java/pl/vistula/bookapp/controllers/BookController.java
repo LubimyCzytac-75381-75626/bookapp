@@ -28,13 +28,19 @@ public class BookController {
     private BookRepository bookRepository;
 
     @GetMapping("/")
-    List<Book> list(@RequestParam(required = false) Long authorId) {
-        if (authorId == null) {
-            log.info("Getting list of books");
-            return bookRepository.findAll();
-        } else {
+    List<Book> list(
+        @RequestParam(required = false) Long authorId,
+        @RequestParam(required = false) Long categoryId
+    ) {
+        if (authorId != null) {
             log.info("Getting list of books for author with id: {}", authorId);
             return bookRepository.findByAuthorsId(authorId);
+        } else if (categoryId != null) {
+            log.info("Getting list of books for category with id: {}", categoryId);
+            return bookRepository.findByCategoriesId(categoryId);
+        } else {
+            log.info("Getting list of books");
+            return bookRepository.findAll();
         }
     }
 
