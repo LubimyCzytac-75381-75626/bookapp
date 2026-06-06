@@ -39,6 +39,12 @@ java -jar ./target/bookapp-0.0.1-SNAPSHOT.jar
 ```
 * Usunięcie autora: DELETE /author/{id}, gdzie {id} to identyfikator autora
 
+### Zdjęcia autorów
+
+* Dodanie zdjęcia autora: POST /author/{id}/photo, gdzie {id} to identyfikator autora. Plik jest przenoszony do pola file multipart-body
+* Otrzymanie zdjęcia autora: GET /author/{id}/photo, gdzie {id} to identyfikator autora
+* Usunięcie zdjęcia autora: DELETE /author/{id}/photo, gdzie {id} to identyfikator autora
+
 ### Kategorii:
 
 * Lista wszystkich kategorii: GET /categories/
@@ -68,7 +74,13 @@ java -jar ./target/bookapp-0.0.1-SNAPSHOT.jar
 	"categories":[{"id":2}]
 }
 ```
-* Usunięcie książki: DELETE /book/{id},gdzie {id} to identyfikator książki
+* Usunięcie książki: DELETE /book/{id}, gdzie {id} to identyfikator książki
+
+### Okładki książek
+
+* Dodanie okładki książki: POST /book/{id}/cover, gdzie {id} to identyfikator książki. Plik jest przenoszony do pola file multipart-body
+* Otrzymanie okładki książki: GET /book/{id}/cover, gdzie {id} to identyfikator książki
+* Usunięcie okładki książki: DELETE /book/{id}/cover, gdzie {id} to identyfikator książki
 
 ### Recenzje książek:
 
