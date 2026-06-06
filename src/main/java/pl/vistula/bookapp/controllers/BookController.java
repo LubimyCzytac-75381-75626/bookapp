@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import lombok.extern.slf4j.Slf4j;
 import pl.vistula.bookapp.jpa.model.Book;
 import pl.vistula.bookapp.jpa.repository.BookRepository;
+import pl.vistula.bookapp.jpa.repository.BookReviewRepository;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,6 +27,9 @@ public class BookController {
 
     @Autowired
     private BookRepository bookRepository;
+
+    @Autowired
+    private BookReviewRepository bookReviewRepository;
 
     @GetMapping("/")
     List<Book> list(
@@ -62,6 +66,7 @@ public class BookController {
     @DeleteMapping("/{id}")
     void delete(@PathVariable Long id) {
         log.info("Deleting book with id: {}", id);
+        bookReviewRepository.deleteByBookId(id);
         bookRepository.deleteById(id);
     }
 
