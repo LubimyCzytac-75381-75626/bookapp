@@ -235,6 +235,31 @@ input, textarea, select {
     color: #333;
 }
 
+.pole-autora {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.btn-dodaj-autora {
+    background-color: #f5f5f5;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    padding: 0 15px;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #555;
+    transition: all 0.2s;
+    flex-shrink: 0; 
+}
+
+.btn-usun-autora {
+    color: #d9534f;
+    background-color: #fff0f0;
+    border-color: #f5c6c6;
+}
+
 .dodaj-ksiazke-uklad {
     display: flex;
     gap: 40px;
@@ -269,16 +294,29 @@ input, textarea, select {
     flex-grow: 1;
 }
 
-.formularz-kolumna input {
+.formularz-kolumna input, .formularz-kolumna textarea {
     border: none;
     border-bottom: 2px solid #adb5bd;
     border-radius: 0;
     padding: 10px 0;
     background-color: transparent;
+    width: 100%;
+    font-size: 15px;
 }
 
-.formularz-kolumna input:focus {
+.formularz-kolumna textarea {
+    resize: none;
+    overflow: hidden;
+    min-height: 41px;
+}
+
+.formularz-kolumna input:focus, .formularz-kolumna textarea:focus {
     border-bottom-color: #78b833;
+    outline: none;
+}
+
+.formularz-kolumna input::placeholder, .formularz-kolumna textarea::placeholder {
+    color: #adb5bd;
 }
 
 .karta-recenzji {

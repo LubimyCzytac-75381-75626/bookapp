@@ -61,6 +61,11 @@
                             <span class="link-dodaj" style="color: #6a7482; text-decoration: none; cursor: default;">Wszystkie kategorie z bazy</span>
                         </div>
 
+                        <div class="form-grupa" style="margin-top: 25px;">
+                            <label for="opis">Opis książki <span style="color:#d9534f">*</span></label>
+                            <textarea id="opis" rows="1" placeholder="Napisz o czym jest ta książka..." required></textarea>
+                        </div>
+
                         <button type="submit" id="btn-zapisz" class="btn-akcja btn-duzy" style="margin-top: 30px;">Zapisz książkę</button>
                     </form>
                 </div>
@@ -81,6 +86,11 @@
                     <p style="color: #6a7482; margin-bottom: 15px;">Kategorie: <span id="detale-kategorie">Brak</span></p>
                     <p><strong>Rok wydania:</strong> <span id="detale-rok">2020</span></p>
                     <p><strong>Średnia ocena:</strong> <span id="detale-ocena" style="color: #e67e22; font-weight: bold; font-size: 18px;">Ładowanie...</span></p>
+                    
+                    <div style="margin-top: 20px;">
+                        <p style="font-weight: bold; margin-bottom: 5px;">Opis:</p>
+                        <p id="detale-opis" style="color: #555; line-height: 1.6;">Brak opisu.</p>
+                    </div>
                 </div>
             </div>
 
@@ -93,10 +103,10 @@
             <div class="dodaj-recenzje-blok">
                 <h4 style="margin-bottom: 15px;">Dodaj swoją recenzję</h4>
                 <form id="formularz-recenzji">
-                    <div class="form-grupa" style="margin-bottom: 15px;">
+                    <div class="form-grupa">
                         <input type="text" id="recenzja-autor" placeholder="Twoje imię / nick" required style="border: 1px solid #ddd; padding: 10px;">
                     </div>
-                    <div class="form-grupa" style="margin-bottom: 15px;">
+                    <div class="form-grupa">
                         <input type="number" id="recenzja-ocena" min="1" max="10" placeholder="Twoja ocena (1-10)" required style="border: 1px solid #ddd; padding: 10px;">
                     </div>
                     <div class="form-grupa">

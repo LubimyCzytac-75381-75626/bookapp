@@ -1,3 +1,4 @@
+// elementy nawigacji
 const btnLista = document.getElementById('btn-lista');
 const btnDodaj = document.getElementById('btn-dodaj');
 const btnPowrot = document.getElementById('btn-powrot');
@@ -5,6 +6,7 @@ const sekcjaLista = document.getElementById('sekcja-lista');
 const sekcjaDodaj = document.getElementById('sekcja-dodaj');
 const sekcjaSzczegoly = document.getElementById('sekcja-szczegoly');
 
+// sterowanie widokami
 function pokazSekcje(sekcja) {
     sekcjaLista.style.display = 'none';
     sekcjaDodaj.style.display = 'none';
@@ -19,13 +21,23 @@ btnLista.addEventListener('click', () => {
 
 btnDodaj.addEventListener('click', () => {
     pokazSekcje(sekcjaDodaj);
-    inicjalizujPolaDynamiczne();
+    inicjalizujDynamicznePola();
 });
 
 btnPowrot.addEventListener('click', () => {
     pokazSekcje(sekcjaLista);
 });
 
+// automatyczne dopasowanie wysokosci pola opisu
+const poleOpis = document.getElementById('opis');
+if (poleOpis) {
+    poleOpis.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = this.scrollHeight + 'px';
+    });
+}
+
+// okno modalne autora
 const modalAutor = document.getElementById('modal-autor');
 const btnOtworzModal = document.getElementById('otworz-modal-autora');
 const btnZamknijModal = document.getElementById('zamknij-modal');
@@ -39,152 +51,156 @@ btnZamknijModal.addEventListener('click', () => {
     modalAutor.style.display = 'none';
 });
 
-let pobraniAutorzyWCache = [];
-let pobraneKategorieWCache = [];
+// pobieranie danych slownikowych dla formularza
+let pamiecAutorow = [];
+let pamiecKategorii = [];
 
-function pobierzDaneDoSlownikow() {
+function pobierzDaneSlownikowe() {
     fetch('/author/')
         .then(res => res.json())
         .then(dane => {
-            pobraniAutorzyWCache = dane;
+            pamiecAutorow = dane;
         })
         .catch(err => console.log('blad pobierania autorow', err));
 
     fetch('/category/')
-        .then(res => {
-            if(!res.ok) throw new Error('Brak endpointu');
-            return res.json();
-        })
+        .then(res => res.json())
         .then(dane => {
-            pobraneKategorieWCache = dane;
+            pamiecKategorii = dane;
         })
-        .catch(() => {
-            pobraneKategorieWCache = [
-                { id: 1, name: "Fantastyka" },
-                { id: 2, name: "Kryminał" },
-                { id: 3, name: "Romans" },
-                { id: 4, name: "Thriller" },
-                { id: 5, name: "Biografia" }
-            ];
-        });
+        .catch(err => console.log('blad pobierania kategorii', err));
 }
 
-function inicjalizujPolaDynamiczne() {
+// obsluga pol z wybieraniem z listy
+function inicjalizujDynamicznePola() {
     const kontenerAutorow = document.getElementById('kontener-autorow');
     const kontenerKategorii = document.getElementById('kontener-kategorii');
     
     kontenerAutorow.innerHTML = '';
     kontenerKategorii.innerHTML = '';
 
-    dodajPoleAutocomplete(kontenerAutorow, pobraniAutorzyWCache, 'autor-wybrany-id', 'Wpisz min. 3 znaki lub kliknij...', true);
-    dodajPoleAutocomplete(kontenerKategorii, pobraneKategorieWCache, 'kategoria-wybrana-id', 'Wpisz min. 3 znaki lub kliknij...', true);
+    dodajWierszZLista(kontenerAutorow, pamiecAutorow, 'id-wybranego-autora', 'Wpisz min. 3 znaki lub kliknij...', true);
+    dodajWierszZLista(kontenerKategorii, pamiecKategorii, 'id-wybranej-kategorii', 'Wpisz min. 3 znaki lub kliknij...', true);
 }
 
-function dodajPoleAutocomplete(kontener, daneZrodlowe, nazwaKlasyId, placeholderTekst, czyPierwsze) {
+function dodajWierszZLista(kontener, dane, klasaDlaId, placeholder, toPierwszy) {
     const wiersz = document.createElement('div');
     wiersz.className = 'dynamiczny-wiersz';
 
-    const wrapper = document.createElement('div');
-    wrapper.className = 'autocomplete-wrapper';
+    const opakowanie = document.createElement('div');
+    opakowanie.className = 'autocomplete-wrapper';
 
-    const inputTekstowy = document.createElement('input');
-    inputTekstowy.type = 'text';
-    inputTekstowy.placeholder = placeholderTekst;
-    inputTekstowy.required = true;
-    inputTekstowy.autocomplete = 'off';
+    const poleTekstowe = document.createElement('input');
+    poleTekstowe.type = 'text';
+    poleTekstowe.placeholder = placeholder;
+    poleTekstowe.required = true;
+    poleTekstowe.autocomplete = 'off';
 
-    const ukrytyInputId = document.createElement('input');
-    ukrytyInputId.type = 'hidden';
-    ukrytyInputId.className = nazwaKlasyId;
+    const ukryteId = document.createElement('input');
+    ukryteId.type = 'hidden';
+    ukryteId.className = klasaDlaId;
 
-    const listaPodpowiedzi = document.createElement('div');
-    listaPodpowiedzi.className = 'autocomplete-lista';
-    listaPodpowiedzi.style.display = 'none';
+    const divZLista = document.createElement('div');
+    divZLista.className = 'autocomplete-lista';
+    divZLista.style.display = 'none';
 
-    wrapper.appendChild(inputTekstowy);
-    wrapper.appendChild(ukrytyInputId);
-    wrapper.appendChild(listaPodpowiedzi);
+    opakowanie.appendChild(poleTekstowe);
+    opakowanie.appendChild(ukryteId);
+    opakowanie.appendChild(divZLista);
 
-    const btnAkcja = document.createElement('button');
-    btnAkcja.type = 'button';
+    const przycisk = document.createElement('button');
+    przycisk.type = 'button';
     
-    if (czyPierwsze) {
-        btnAkcja.className = 'btn-dynamiczny';
-        btnAkcja.innerText = '+';
-        btnAkcja.addEventListener('click', () => {
-            dodajPoleAutocomplete(kontener, daneZrodlowe, nazwaKlasyId, placeholderTekst, false);
+    if (toPierwszy) {
+        przycisk.className = 'btn-dynamiczny';
+        przycisk.innerText = '+';
+        przycisk.addEventListener('click', () => {
+            dodajWierszZLista(kontener, dane, klasaDlaId, placeholder, false);
         });
     } else {
-        btnAkcja.className = 'btn-dynamiczny btn-usun-dynamiczny';
-        btnAkcja.innerText = '-';
-        btnAkcja.addEventListener('click', () => {
+        przycisk.className = 'btn-dynamiczny btn-usun-dynamiczny';
+        przycisk.innerText = '-';
+        przycisk.addEventListener('click', () => {
             wiersz.remove();
         });
     }
 
-    wiersz.appendChild(wrapper);
-    wiersz.appendChild(btnAkcja);
+    wiersz.appendChild(opakowanie);
+    wiersz.appendChild(przycisk);
     kontener.appendChild(wiersz);
 
-    konfigurujZachowanieAutocomplete(inputTekstowy, ukrytyInputId, listaPodpowiedzi, daneZrodlowe);
+    ustawZdarzeniaDlaWiersza(poleTekstowe, ukryteId, divZLista, dane);
 }
 
-function konfigurujZachowanieAutocomplete(input, ukryteId, lista, dane) {
-    input.addEventListener('focus', () => {
-        renderujListeAutocomplete(lista, dane, input, ukryteId);
-        lista.style.display = 'block';
+// filtrowanie po literach i kliknieciach
+function ustawZdarzeniaDlaWiersza(pole, ukryteId, lista, dane) {
+    pole.addEventListener('focus', () => {
+        if (pole.value.length === 0) {
+            budujPozycjeListy(lista, dane, pole, ukryteId);
+            lista.style.display = 'block';
+        } else {
+            uruchomFiltrowanie(pole, ukryteId, lista, dane);
+            lista.style.display = 'block';
+        }
     });
 
-    input.addEventListener('input', () => {
-        ukryteId.value = '';
-        const wpisane = input.value.toLowerCase();
-        
-        if (wpisane.length === 0) {
-            renderujListeAutocomplete(lista, dane, input, ukryteId);
-            return;
-        }
-
-        if (wpisane.length > 0 && wpisane.length < 3) {
-            lista.innerHTML = '<div class="autocomplete-pusty">Wpisz minimum 3 znaki...</div>';
-            lista.style.display = 'block';
-            return;
-        }
-
-        const przefiltrowane = dane.filter(el => el.name.toLowerCase().includes(wpisane));
-        renderujListeAutocomplete(lista, przefiltrowane, input, ukryteId);
+    pole.addEventListener('input', () => {
+        uruchomFiltrowanie(pole, ukryteId, lista, dane);
     });
 
     document.addEventListener('click', (e) => {
-        if (e.target !== input && e.target !== lista) {
+        if (e.target !== pole && e.target !== lista) {
             lista.style.display = 'none';
         }
     });
 }
 
-function renderujListeAutocomplete(listaElement, dane, inputElement, ukryteIdElement) {
+function uruchomFiltrowanie(pole, ukryteId, lista, dane) {
+    ukryteId.value = '';
+    const tekst = pole.value.toLowerCase();
+    
+    if (tekst.length === 0) {
+        budujPozycjeListy(lista, dane, pole, ukryteId);
+        lista.style.display = 'block';
+        return;
+    }
+
+    if (tekst.length > 0 && tekst.length < 3) {
+        lista.innerHTML = '<div class="autocomplete-pusty">Wpisz minimum 3 znaki...</div>';
+        lista.style.display = 'block';
+        return;
+    }
+
+    const pasujace = dane.filter(el => el.name.toLowerCase().includes(tekst));
+    budujPozycjeListy(lista, pasujace, pole, ukryteId);
+    lista.style.display = 'block';
+}
+
+function budujPozycjeListy(listaElement, elementy, poleElement, ukryteIdElement) {
     listaElement.innerHTML = '';
     
-    if (dane.length === 0) {
+    if (elementy.length === 0) {
         listaElement.innerHTML = '<div class="autocomplete-pusty">Brak wyników w bazie.</div>';
         return;
     }
 
-    dane.forEach(el => {
-        const item = document.createElement('div');
-        item.className = 'autocomplete-item';
-        item.innerText = `${el.name} (id ${el.id})`;
+    elementy.forEach(el => {
+        const pozycja = document.createElement('div');
+        pozycja.className = 'autocomplete-item';
+        pozycja.innerText = `${el.name} (id ${el.id})`;
         
-        item.addEventListener('click', (e) => {
-            e.stopPropagation();
-            inputElement.value = el.name;
+        pozycja.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            poleElement.value = el.name;
             ukryteIdElement.value = el.id;
             listaElement.style.display = 'none';
         });
         
-        listaElement.appendChild(item);
+        listaElement.appendChild(pozycja);
     });
 }
 
+// zapisywanie autora
 formularzAutora.addEventListener('submit', (e) => {
     e.preventDefault();
 
@@ -204,84 +220,89 @@ formularzAutora.addEventListener('submit', (e) => {
     .then(() => {
         modalAutor.style.display = 'none';
         formularzAutora.reset();
-        pobierzDaneDoSlownikow();
+        pobierzDaneSlownikowe();
         alert('Autor został dodany do bazy!');
     })
     .catch(err => console.log('blad zapisu autora', err));
 });
 
-let pobraneKsiazki = [];
+// zarzadzanie ksiazkami
+let listaPobranychKsiazek = [];
 
 function pobierzKsiazki() {
-    const kontener = document.getElementById('lista-ksiazek-kontener');
-    kontener.innerHTML = '<p class="pusty-stan">Ładowanie...</p>';
+    const obszar = document.getElementById('lista-ksiazek-kontener');
+    obszar.innerHTML = '<p class="pusty-stan">Ładowanie...</p>';
 
     fetch('/book/')
         .then(res => res.json())
         .then(dane => {
-            pobraneKsiazki = dane;
-            kontener.innerHTML = '';
+            listaPobranychKsiazek = dane;
+            obszar.innerHTML = '';
             
             if(dane.length === 0) {
-                kontener.innerHTML = '<p class="pusty-stan">Brak książek w bazie.</p>';
+                obszar.innerHTML = '<p class="pusty-stan">Brak książek w bazie.</p>';
                 return;
             }
 
-            dane.forEach(ksiazka => {
-                const karta = document.createElement('div');
-                karta.className = 'karta-ksiazki';
+            dane.forEach(k => {
+                const ramka = document.createElement('div');
+                ramka.className = 'karta-ksiazki';
                 
-                let nazwyAutorow = "Brak autora";
-                if(ksiazka.authors && ksiazka.authors.length > 0) {
-                    nazwyAutorow = ksiazka.authors.map(a => a.name).join(', ');
+                let tekstAutorow = "Brak autora";
+                if(k.authors && k.authors.length > 0) {
+                    tekstAutorow = k.authors.map(a => a.name).join(', ');
                 }
 
-                karta.innerHTML = `
+                ramka.innerHTML = `
                     <div class="karta-okladka">Brak okładki</div>
                     <div class="karta-info">
-                        <h3 class="karta-tytul">${ksiazka.name}</h3>
-                        <p class="karta-autor">${nazwyAutorow}</p>
-                        <p style="font-size: 12px; color: #666; margin-bottom: 10px;">Rok: ${ksiazka.bookYear}</p>
-                        <button class="btn-akcja btn-maly" onclick="pokazDetale(${ksiazka.id})">Szczegóły</button>
+                        <h3 class="karta-tytul">${k.name}</h3>
+                        <p class="karta-autor">${tekstAutorow}</p>
+                        <p style="font-size: 12px; color: #666; margin-bottom: 10px;">Rok: ${k.bookYear}</p>
+                        <button class="btn-akcja btn-maly" onclick="pokazDetale(${k.id})">Szczegóły</button>
                     </div>
                 `;
-                kontener.appendChild(karta);
+                obszar.appendChild(ramka);
             });
         })
         .catch(err => {
             console.log('blad pobierania ksiazek', err);
-            kontener.innerHTML = '<p class="pusty-stan">Błąd połączenia z serwerem.</p>';
+            obszar.innerHTML = '<p class="pusty-stan">Błąd połączenia z serwerem.</p>';
         });
 }
 
-const formularzKsiazki = document.getElementById('formularz-ksiazki');
+// dodawanie nowej ksiazki
+const formKsiazki = document.getElementById('formularz-ksiazki');
 
-formularzKsiazki.addEventListener('submit', (e) => {
+formKsiazki.addEventListener('submit', (e) => {
     e.preventDefault();
 
-    const ukryteAutorzyId = document.querySelectorAll('.autor-wybrany-id');
-    const tablicaAutorow = [];
-    ukryteAutorzyId.forEach(input => {
-        if(input.value) tablicaAutorow.push({ id: parseInt(input.value) });
+    const autorzyPola = document.querySelectorAll('.id-wybranego-autora');
+    const zebraniAutorzy = [];
+    autorzyPola.forEach(p => {
+        if(p.value) zebraniAutorzy.push({ id: parseInt(p.value) });
     });
 
-    const ukryteKategorieId = document.querySelectorAll('.kategoria-wybrana-id');
-    const tablicaKategorii = [];
-    ukryteKategorieId.forEach(input => {
-        if(input.value) tablicaKategorii.push({ id: parseInt(input.value) });
+    const kategoriePola = document.querySelectorAll('.id-wybranej-kategorii');
+    const zebraneKategorie = [];
+    kategoriePola.forEach(p => {
+        if(p.value) zebraneKategorie.push({ id: parseInt(p.value) });
     });
 
-    if(tablicaAutorow.length === 0) {
+    if(zebraniAutorzy.length === 0) {
         alert("Musisz wybrać autora z listy!");
         return;
     }
 
-    const nowaKsiazka = {
+    const poleOpcjonalneOpis = document.getElementById('opis');
+    
+    const ksiazkaDane = {
         rating: 0, 
         name: document.getElementById('tytul').value.trim(),
+        description: poleOpcjonalneOpis ? poleOpcjonalneOpis.value.trim() : "",
         bookYear: parseInt(document.getElementById('rok').value),
-        authors: tablicaAutorow,
-        categories: tablicaKategorii
+        authors: zebraniAutorzy,
+        categories: zebraneKategorie
     };
 
     fetch('/book/save', {
@@ -289,93 +310,99 @@ formularzKsiazki.addEventListener('submit', (e) => {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify(nowaKsiazka)
+        body: JSON.stringify(ksiazkaDane)
     })
     .then(res => res.json())
     .then(() => {
-        formularzKsiazki.reset();
+        formKsiazki.reset();
+        if (poleOpcjonalneOpis) {
+            poleOpcjonalneOpis.style.height = 'auto';
+        }
         pokazSekcje(sekcjaLista);
         pobierzKsiazki();
     })
     .catch(err => console.log('blad zapisu ksiazki', err));
 });
 
-let aktualniePrzegladanaKsiazkaId = null;
+// detale i recenzje
+let sprawdzanaKsiazkaId = null;
 
 window.pokazDetale = function(id) {
-    const ksiazka = pobraneKsiazki.find(k => k.id === id);
+    const k = listaPobranychKsiazek.find(szukana => szukana.id === id);
 
-    if (ksiazka) {
-        aktualniePrzegladanaKsiazkaId = ksiazka.id;
+    if (k) {
+        sprawdzanaKsiazkaId = k.id;
 
-        let nazwyAutorow = "Brak autora";
-        if(ksiazka.authors && ksiazka.authors.length > 0) {
-            nazwyAutorow = ksiazka.authors.map(a => a.name).join(', ');
+        let tekstAutorow = "Brak autora";
+        if(k.authors && k.authors.length > 0) {
+            tekstAutorow = k.authors.map(a => a.name).join(', ');
         }
 
-        let nazwyKategorii = "Brak";
-        if(ksiazka.categories && ksiazka.categories.length > 0) {
-            nazwyKategorii = ksiazka.categories.map(c => c.name).join(', ');
+        let tekstKategorii = "Brak";
+        if(k.categories && k.categories.length > 0) {
+            tekstKategorii = k.categories.map(c => c.name).join(', ');
         }
 
-        document.getElementById('detale-tytul').innerText = ksiazka.name;
-        document.getElementById('detale-autor').innerText = nazwyAutorow;
-        document.getElementById('detale-kategorie').innerText = nazwyKategorii;
-        document.getElementById('detale-rok').innerText = ksiazka.bookYear;
+        document.getElementById('detale-tytul').innerText = k.name;
+        document.getElementById('detale-autor').innerText = tekstAutorow;
+        document.getElementById('detale-kategorie').innerText = tekstKategorii;
+        document.getElementById('detale-rok').innerText = k.bookYear;
+        
+        document.getElementById('detale-opis').innerText = k.description ? k.description : "Brak opisu.";
         
         pokazSekcje(sekcjaSzczegoly);
-        pobierzRecenzje(id);
+        odswiezRecenzje(id);
     }
 }
 
-function pobierzRecenzje(bookId) {
-    const kontener = document.getElementById('lista-recenzji');
-    kontener.innerHTML = '<p class="pusty-stan">Ładowanie recenzji...</p>';
+function odswiezRecenzje(ksiazkaId) {
+    const obszarRecenzji = document.getElementById('lista-recenzji');
+    obszarRecenzji.innerHTML = '<p class="pusty-stan">Ładowanie recenzji...</p>';
 
-    fetch(`/book-review/?bookId=${bookId}`)
+    fetch(`/book-review/?bookId=${ksiazkaId}`)
         .then(res => res.json())
         .then(dane => {
-            kontener.innerHTML = '';
+            obszarRecenzji.innerHTML = '';
             
             if(dane.length === 0) {
-                kontener.innerHTML = '<p class="pusty-stan">Nikt jeszcze nie ocenił tej książki. Bądź pierwszy!</p>';
+                obszarRecenzji.innerHTML = '<p class="pusty-stan">Nikt jeszcze nie ocenił tej książki. Bądź pierwszy!</p>';
                 document.getElementById('detale-ocena').innerText = "Brak ocen";
                 return;
             }
 
-            let sumaOcen = 0;
+            let suma = 0;
 
-            dane.forEach(recenzja => {
-                sumaOcen += recenzja.grade;
-                const karta = document.createElement('div');
-                karta.className = 'karta-recenzji';
-                karta.innerHTML = `
+            dane.forEach(r => {
+                suma += r.grade;
+                const klocek = document.createElement('div');
+                klocek.className = 'karta-recenzji';
+                klocek.innerHTML = `
                     <div class="recenzja-naglowek">
-                        <span class="recenzja-autor">${recenzja.userName}</span>
-                        <span class="recenzja-ocena">${recenzja.grade}/10</span>
+                        <span class="recenzja-autor">${r.userName}</span>
+                        <span class="recenzja-ocena">${r.grade}/10</span>
                     </div>
-                    <div class="recenzja-tekst">"${recenzja.reviewText}"</div>
+                    <div class="recenzja-tekst">"${r.reviewText}"</div>
                 `;
-                kontener.appendChild(karta);
+                obszarRecenzji.appendChild(klocek);
             });
 
-            const srednia = (sumaOcen / dane.length).toFixed(1);
-            document.getElementById('detale-ocena').innerText = `${srednia}/10`;
+            const wyliczonaSrednia = (suma / dane.length).toFixed(1);
+            document.getElementById('detale-ocena').innerText = `${wyliczonaSrednia}/10`;
         })
         .catch(err => {
-            console.log('blad pobierania recenzji', err);
-            kontener.innerHTML = '<p class="pusty-stan">Błąd ładowania recenzji.</p>';
+            console.log('blad ladowania recenzji', err);
+            obszarRecenzji.innerHTML = '<p class="pusty-stan">Błąd ładowania recenzji.</p>';
         });
 }
 
-const formularzRecenzji = document.getElementById('formularz-recenzji');
+const formRecenzja = document.getElementById('formularz-recenzji');
 
-formularzRecenzji.addEventListener('submit', (e) => {
+formRecenzja.addEventListener('submit', (e) => {
     e.preventDefault();
-    if(!aktualniePrzegladanaKsiazkaId) return;
+    if(!sprawdzanaKsiazkaId) return;
 
-    const nowaRecenzja = {
-        book: { id: aktualniePrzegladanaKsiazkaId },
+    const recenzjaDane = {
+        book: { id: sprawdzanaKsiazkaId },
         userName: document.getElementById('recenzja-autor').value.trim(),
         grade: parseInt(document.getElementById('recenzja-ocena').value),
         reviewText: document.getElementById('recenzja-tekst').value.trim()
@@ -386,25 +413,26 @@ formularzRecenzji.addEventListener('submit', (e) => {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify(nowaRecenzja)
+        body: JSON.stringify(recenzjaDane)
     })
     .then(res => res.json())
     .then(() => {
-        formularzRecenzji.reset();
-        pobierzRecenzje(aktualniePrzegladanaKsiazkaId);
+        formRecenzja.reset();
+        odswiezRecenzje(sprawdzanaKsiazkaId);
     })
     .catch(err => console.log('blad zapisu recenzji', err));
 });
 
-const btnUsunKsiazke = document.getElementById('btn-usun-ksiazke');
+// usuwanie ksiazki
+const przyciskUsun = document.getElementById('btn-usun-ksiazke');
 
-btnUsunKsiazke.addEventListener('click', () => {
-    if (!aktualniePrzegladanaKsiazkaId) return;
+przyciskUsun.addEventListener('click', () => {
+    if (!sprawdzanaKsiazkaId) return;
 
-    const czyUsunac = confirm("Czy na pewno chcesz usunąć tę książkę z bazy?");
+    const pytanie = confirm("Czy na pewno chcesz usunąć tę książkę z bazy?");
     
-    if (czyUsunac) {
-        fetch(`/book/${aktualniePrzegladanaKsiazkaId}`, {
+    if (pytanie) {
+        fetch(`/book/${sprawdzanaKsiazkaId}`, {
             method: 'DELETE'
         })
         .then(res => {
@@ -420,5 +448,6 @@ btnUsunKsiazke.addEventListener('click', () => {
     }
 });
 
-pobierzDaneDoSlownikow();
+// uruchomienie podstawowych danych na starcie
+pobierzDaneSlownikowe();
 pobierzKsiazki();
