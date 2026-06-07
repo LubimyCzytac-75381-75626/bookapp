@@ -88,13 +88,14 @@ java -jar ./target/bookapp-0.0.1-SNAPSHOT.jar
 
 * Lista wszystkich recenzji dla określonej książki : GET /book-review/?bookId={id} gdzie {id} to identyfikator książki
 * Odczyt konkretnej recenzji: GET /book-review/{id}, gdzie {id} to identyfikator recenzji
-* Utworzenie/aktualizacja recenzji: POST /book-review/save z treścią żądania w formacie (jeśli pole id nie jest podane w JSON-ie, zostanie utworzona nowa recenzja; jeśli jest podane, istniejąca recenzja zostanie zaktualizowana)
+* Utworzenie/aktualizacja recenzji: POST /book-review/save  z treścią żądania w formacie (jeśli pole id nie jest podane w JSON-ie, zostanie utworzona nowa recenzja; jeśli jest podane, istniejąca recenzja zostanie zaktualizowana). Jeśli jest to podrecenzja (odpowiedź na inną recenzję), dodawany jest parametr zapytania ?parentId={parentId}, gdzie {parentId} - to ID komentarza nadrzędnego
 ```
 {
 	"book": {"id": 2},
 	"userName": "VeryCleverUser",
 	"grade": 10,
-	"reviewText": "The best book in the world"
+	"reviewText": "The best book in the world",
+	children: []
 }
 ```
 *  Usunięcie recenzji: DELETE /book-review/{id}, gdzie {id} to identyfikator recenzji

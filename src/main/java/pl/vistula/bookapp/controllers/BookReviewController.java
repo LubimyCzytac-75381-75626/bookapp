@@ -30,12 +30,13 @@ public class BookReviewController {
     @GetMapping("/")
     List<BookReview> list(@RequestParam Long bookId) {
         log.info("Getting list of books for author with id: {}", bookId);
-        return bookReviewRepository.findByBookId(bookId);
+        return bookReviewRepository.findByBookIdAndParentIsNull(bookId);
     }
     @PostMapping("/save")
-    public BookReview save(@RequestBody BookReview bookReview) {
+    public BookReview save(@RequestBody BookReview bookReview, @RequestParam Long parentId) {
         log.info("Saving book review: {}", bookReview);
 
+        bookReview.setParent(new BookReview().setId(parentId));
         return bookReviewRepository.save(bookReview);
     }
 

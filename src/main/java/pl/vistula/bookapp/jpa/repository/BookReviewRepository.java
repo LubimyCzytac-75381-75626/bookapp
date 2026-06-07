@@ -8,5 +8,9 @@ import pl.vistula.bookapp.jpa.model.BookReview;
 
 public interface BookReviewRepository extends JpaRepository<BookReview, Long> {
     List<BookReview> findByBookId(Long bookId);
+
+    // Uzyska tylko główne recenzje konkretnej książki
+    List<BookReview> findByBookIdAndParentIsNull(Long bookId);
+
     void deleteByBookId(Long bookId);
 }

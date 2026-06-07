@@ -1,0 +1,16 @@
+databaseChangeLog:
+- changeSet:
+    id: add-book-review-parent
+    author: tymofii.salashnik
+    changes:
+    - addColumn:
+        tableName: book_review
+        columns:
+        - column:
+            name: parent_id
+            type: bigint
+            remarks: Reference to parent review
+            constraints:
+              referencedTableName: book_review
+              referencedColumnNames: id
+              foreignKeyName: fk_book_review_parent            
