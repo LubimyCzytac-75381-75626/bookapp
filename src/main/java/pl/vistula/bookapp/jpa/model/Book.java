@@ -3,6 +3,8 @@ package pl.vistula.bookapp.jpa.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -44,7 +46,11 @@ public class Book {
     
     @Column(name = "book_year")
     @NotNull(message = "Book year cannot be empty")
-    Integer bookYear; 
+    Integer bookYear;
+
+    @Column(name = "cover")
+    @JsonIgnore
+    byte[] cover; 
 
     @ManyToMany
     @JoinTable(

@@ -1,0 +1,23 @@
+databaseChangeLog:
+- changeSet:
+    id: add-book-covers
+    author: tymofii.salashnik
+    changes:
+    - addColumn:
+        tableName: book
+        columns:
+        - column:
+            name: cover
+            type: bytea
+            remarks: Book cover
+- changeSet:
+    id: add-author-photo
+    author: tymofii.salashnik
+    changes:
+    - addColumn:
+        tableName: author
+        columns:
+        - column:
+            name: photo
+            type: bytea
+            remarks: Author photo
