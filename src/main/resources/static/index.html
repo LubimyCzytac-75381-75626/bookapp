@@ -29,10 +29,12 @@
         <section id="sekcja-dodaj" class="karta-zawartosci" style="display: none;">
             <div class="dodaj-ksiazke-uklad">
                 <div class="dodaj-okladke-kolumna">
-                    <div class="okladka-placeholder">
-                        <span style="color: #e67e22; font-weight: 500; font-size: 18px;">Dodaj<br>okładkę</span>
+                    <input type="file" id="plik-okladka" accept="image/jpeg, image/png" style="display: none;">
+                    <div class="okladka-placeholder" id="okladka-obszar-klik">
+                        <img id="okladka-podglad" src="" style="display: none; width: 100%; height: 100%; object-fit: cover;">
+                        <span id="okladka-tekst" style="color: #e67e22; font-weight: 500; font-size: 18px;">Dodaj<br>okładkę</span>
                     </div>
-                    <p class="okladka-info">Maksymalny<br>rozmiar pliku 1MB<br><span style="color: #adb5bd; font-size: 16px;">JPG</span></p>
+                    <p class="okladka-info">Maksymalny<br>rozmiar pliku 1MB<br><span style="color: #adb5bd; font-size: 16px;">JPG / PNG</span></p>
                 </div>
                 
                 <div class="formularz-kolumna">
@@ -79,7 +81,10 @@
             </div>
             
             <div class="szczegoly-kontener">
-                <div class="szczegoly-okladka-duza">Brak okładki</div>
+                <div class="szczegoly-okladka-duza">
+                    <img id="detale-okladka-img" src="" style="display: none; width: 100%; height: 100%; object-fit: cover; border-radius: 4px;">
+                    <span id="detale-okladka-brak">Brak okładki</span>
+                </div>
                 <div class="szczegoly-info">
                     <h2 id="detale-tytul" class="tytul-sekcji" style="margin-bottom: 10px;">Tytuł</h2>
                     <p style="color: #78b833; font-weight: bold; margin-bottom: 5px;">Autor: <span id="detale-autor">Autor</span></p>

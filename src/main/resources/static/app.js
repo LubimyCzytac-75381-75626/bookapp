@@ -51,6 +51,42 @@ btnZamknijModal.addEventListener('click', () => {
     modalAutor.style.display = 'none';
 });
 
+// obsluga wgrywania okladki ksiazki
+let plikOkladki = null;
+const inputOkladka = document.getElementById('plik-okladka');
+const obszarOkladkiKlik = document.getElementById('okladka-obszar-klik');
+const podgladOkladkiImg = document.getElementById('okladka-podglad');
+const podgladOkladkiTekst = document.getElementById('okladka-tekst');
+
+if (obszarOkladkiKlik && inputOkladka) {
+    obszarOkladkiKlik.addEventListener('click', () => {
+        inputOkladka.click();
+    });
+
+    inputOkladka.addEventListener('change', (e) => {
+        const plik = e.target.files[0];
+        if (plik) {
+            plikOkladki = plik;
+            const urlObrazka = URL.createObjectURL(plik);
+            podgladOkladkiImg.src = urlObrazka;
+            podgladOkladkiImg.style.display = 'block';
+            podgladOkladkiTekst.style.display = 'none';
+            obszarOkladkiKlik.style.padding = '0';
+        }
+    });
+}
+
+function zresetujPodgladOkladki() {
+    plikOkladki = null;
+    if (inputOkladka) inputOkladka.value = '';
+    if (podgladOkladkiImg) {
+        podgladOkladkiImg.src = '';
+        podgladOkladkiImg.style.display = 'none';
+    }
+    if (podgladOkladkiTekst) podgladOkladkiTekst.style.display = 'block';
+    if (obszarOkladkiKlik) obszarOkladkiKlik.style.padding = '30px 20px';
+}
+
 // pobieranie danych slownikowych dla formularza
 let pamiecAutorow = [];
 let pamiecKategorii = [];
@@ -63,7 +99,7 @@ function pobierzDaneSlownikowe() {
         })
         .catch(err => console.log('blad pobierania autorow', err));
 
-    fetch('/category/')
+    fetch('/categories/')
         .then(res => res.json())
         .then(dane => {
             pamiecKategorii = dane;
@@ -226,7 +262,7 @@ formularzAutora.addEventListener('submit', (e) => {
     .catch(err => console.log('blad zapisu autora', err));
 });
 
-// zarzadzanie ksiazkami
+// pobieranie i wyswietlanie ksiazek
 let listaPobranychKsiazek = [];
 
 function pobierzKsiazki() {
@@ -254,7 +290,7 @@ function pobierzKsiazki() {
                 }
 
                 ramka.innerHTML = `
-                    <div class="karta-okladka">Brak okładki</div>
+                    <img src="/book/${k.id}/cover" class="karta-img" onerror="this.outerHTML='<div class=\\'karta-okladka-zastepcza\\'>Brak okładki</div>'">
                     <div class="karta-info">
                         <h3 class="karta-tytul">${k.name}</h3>
                         <p class="karta-autor">${tekstAutorow}</p>
@@ -271,7 +307,7 @@ function pobierzKsiazki() {
         });
 }
 
-// dodawanie nowej ksiazki
+// zapisywanie nowej ksiazki
 const formKsiazki = document.getElementById('formularz-ksiazki');
 
 formKsiazki.addEventListener('submit', (e) => {
@@ -313,8 +349,21 @@ formKsiazki.addEventListener('submit', (e) => {
         body: JSON.stringify(ksiazkaDane)
     })
     .then(res => res.json())
+    .then(zapisanaKsiazka => {
+        if (plikOkladki && zapisanaKsiazka && zapisanaKsiazka.id) {
+            const formData = new FormData();
+            formData.append('file', plikOkladki);
+
+            return fetch(`/book/${zapisanaKsiazka.id}/cover`, {
+                method: 'POST',
+                body: formData
+            });
+        }
+        return Promise.resolve();
+    })
     .then(() => {
         formKsiazki.reset();
+        zresetujPodgladOkladki();
         if (poleOpcjonalneOpis) {
             poleOpcjonalneOpis.style.height = 'auto';
         }
@@ -324,7 +373,7 @@ formKsiazki.addEventListener('submit', (e) => {
     .catch(err => console.log('blad zapisu ksiazki', err));
 });
 
-// detale i recenzje
+// detale pojedynczej ksiazki
 let sprawdzanaKsiazkaId = null;
 
 window.pokazDetale = function(id) {
@@ -350,11 +399,26 @@ window.pokazDetale = function(id) {
         
         document.getElementById('detale-opis').innerText = k.description ? k.description : "Brak opisu.";
         
+        const imgOkladka = document.getElementById('detale-okladka-img');
+        const brakOkladki = document.getElementById('detale-okladka-brak');
+        
+        if (imgOkladka && brakOkladki) {
+            imgOkladka.src = `/book/${k.id}/cover`;
+            imgOkladka.style.display = 'block';
+            brakOkladki.style.display = 'none';
+
+            imgOkladka.onerror = function() {
+                imgOkladka.style.display = 'none';
+                brakOkladki.style.display = 'block';
+            };
+        }
+        
         pokazSekcje(sekcjaSzczegoly);
         odswiezRecenzje(id);
     }
 }
 
+// pobieranie recenzji
 function odswiezRecenzje(ksiazkaId) {
     const obszarRecenzji = document.getElementById('lista-recenzji');
     obszarRecenzji.innerHTML = '<p class="pusty-stan">Ładowanie recenzji...</p>';
@@ -395,6 +459,7 @@ function odswiezRecenzje(ksiazkaId) {
         });
 }
 
+// zapisywanie recenzji
 const formRecenzja = document.getElementById('formularz-recenzji');
 
 formRecenzja.addEventListener('submit', (e) => {
@@ -448,6 +513,6 @@ przyciskUsun.addEventListener('click', () => {
     }
 });
 
-// uruchomienie podstawowych danych na starcie
+// uruchomienie na starcie
 pobierzDaneSlownikowe();
 pobierzKsiazki();

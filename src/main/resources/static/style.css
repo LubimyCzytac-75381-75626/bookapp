@@ -114,7 +114,7 @@ button {
     box-shadow: 0 8px 15px rgba(0,0,0,0.1);
 }
 
-.karta-okladka {
+.karta-okladka-zastepcza {
     height: 250px;
     background-color: #f8f9fa;
     display: flex;
@@ -122,6 +122,13 @@ button {
     justify-content: center;
     color: #adb5bd;
     font-size: 14px;
+    border-bottom: 1px solid #eaeaea;
+}
+
+.karta-img {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
     border-bottom: 1px solid #eaeaea;
 }
 
@@ -185,6 +192,7 @@ input, textarea, select {
     border-radius: 4px;
     color: #adb5bd;
     flex-shrink: 0;
+    overflow: hidden;
 }
 
 .link-dodaj {
@@ -283,6 +291,17 @@ input, textarea, select {
     background-color: #fdfdfd;
     margin-bottom: 20px;
     width: 140px;
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    overflow: hidden;
+    transition: border-color 0.2s;
+}
+
+.okladka-placeholder:hover {
+    border-color: #c96b1c;
 }
 
 .okladka-info {
