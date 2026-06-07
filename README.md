@@ -60,9 +60,11 @@ java -jar ./target/bookapp-0.0.1-SNAPSHOT.jar
 
 ### Książki:
 
-* Lista wszystkich książek: GET /book/
-* Lista wszystkich książek danego autora : GET /book/?authorId={id} gdzie {id} to identyfikator autora
-* Lista wszystkich książek danej kategorii : GET /book/?categoryId={id} gdzie {id} to identyfikator kategorii
+* Lista książek: GET /book/
+  *  parametr żądania authorId  - filtr według id autora, napryzklad: GET /book/?authorId={id} gdzie {id} to identyfikator autora
+  * parametr żądania categoryId -  filtr według id kategorii, napryzklad: GET /book/?categoryId={id} gdzie {id} to identyfikator kategorii
+  * parametr żądania name - filtr według wpisu в nazwie książki(без учета регистра), napryzklad: GET /book/?name={n} gdzie {n} to część nazwy książki  
+  * Wszystki parametry mogą być używane jednocześnie, napryzklad GET /book/?categoryId={bookId}&categoryId={categoryId}&name={name}}
 * Odczyt konkretnej książki: GET /book/{id}, gdzie {id} to identyfikator książki
 * Utworzenie/aktualizacja książki: POST /book/save z treścią żądania w formacie (jeśli pole id nie jest podane w JSON-ie, zostanie utworzona nowa książka; jeśli jest podane, istniejąca książka zostanie zaktualizowana)
 ```

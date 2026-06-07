@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -37,14 +38,35 @@ public class BookController {
     @GetMapping("/")
     List<Book> list(
         @RequestParam(required = false) Long authorId,
-        @RequestParam(required = false) Long categoryId
+        @RequestParam(required = false) Long categoryId,
+        @RequestParam(required = false) String name
     ) {
-        if (authorId != null) {
-            log.info("Getting list of books for author with id: {}", authorId);
-            return bookRepository.findByAuthorsId(authorId);
-        } else if (categoryId != null) {
-            log.info("Getting list of books for category with id: {}", categoryId);
-            return bookRepository.findByCategoriesId(categoryId);
+
+        if (authorId != null 
+            || categoryId != null
+            || name != null && !name.trim().isEmpty()) {
+
+            Specification<Book> spec = Specification.unrestricted();
+
+            if (name != null) {
+                spec = spec.and((root, query, cb) -> 
+                    cb.like(
+                        cb.lower(root.get("name")), 
+                        "%" + name.toLowerCase() + "%"
+                    )
+                );
+            }
+
+            if (authorId != null) {
+                spec = spec.and((root, query, cb) -> 
+                    cb.equal(root.join("authors").get("id"), authorId));
+            }
+
+            if (categoryId != null) {
+                spec = spec.and((root, query, cb) -> 
+                    cb.equal(root.join("categories").get("id"), categoryId));
+            }    
+            return bookRepository.findAll(spec);        
         } else {
             log.info("Getting list of books");
             return bookRepository.findAll();
