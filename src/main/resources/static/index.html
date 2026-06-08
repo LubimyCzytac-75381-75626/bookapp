@@ -83,7 +83,7 @@
             <div class="szczegoly-kontener">
                 <div class="szczegoly-okladka-duza">
                     <img id="detale-okladka-img" src="" style="display: none; width: 100%; height: 100%; object-fit: cover; border-radius: 4px;">
-                    <span id="detale-okladka-brak">Brak okładki</span>
+                    <div id="detale-okladka-brak" class="domyslny-awatar" style="border-radius: 4px;">Brak okładki</div>
                 </div>
                 <div class="szczegoly-info">
                     <h2 id="detale-tytul" class="tytul-sekcji" style="margin-bottom: 10px;">Tytuł</h2>
@@ -122,20 +122,55 @@
             </div>
         </section>
 
+        <section id="sekcja-autor-szczegoly" class="karta-zawartosci" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <button id="btn-powrot-z-autora" class="btn-menu">&larr; Powrót</button>
+            </div>
+            
+            <div class="szczegoly-kontener">
+                <div class="szczegoly-okladka-duza" style="border-radius: 50%;">
+                    <img id="autor-detale-img" src="" style="display: none; width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                    <div id="autor-detale-brak" class="domyslny-awatar" style="border-radius: 50%;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="8" r="5"></circle>
+                            <path d="M20 21a8 8 0 0 0-16 0"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="szczegoly-info">
+                    <h2 id="autor-detale-nazwa" class="tytul-sekcji" style="margin-bottom: 10px;">Imię i nazwisko</h2>
+                    <div style="margin-top: 20px;">
+                        <p style="font-weight: bold; margin-bottom: 5px;">Biografia:</p>
+                        <p id="autor-detale-bio" style="color: #555; line-height: 1.6;">Brak biografii.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <div id="modal-autor" class="modal-tlo" style="display: none;">
         <div class="modal-tresc">
             <span id="zamknij-modal" class="zamknij-btn">&times;</span>
-            <h2 class="tytul-sekcji">Dodaj autora</h2>
+            <h2 class="tytul-sekcji" style="text-align: center;">Dodaj autora</h2>
             <form id="formularz-autora">
+                
+                <div class="autor-foto-upload">
+                    <input type="file" id="plik-autor-foto" accept="image/jpeg, image/png" style="display: none;">
+                    <div class="autor-foto-placeholder" id="autor-foto-obszar-klik">
+                        <img id="autor-foto-podglad" src="" style="display: none; width: 100%; height: 100%; object-fit: cover;">
+                        <span id="autor-foto-tekst">+ Zdjęcie</span>
+                    </div>
+                    <small style="color: #adb5bd; margin-top: 8px;">Opcjonalne</small>
+                </div>
+
                 <div class="form-grupa">
-                    <label for="nowy-autor-nazwa">Imię i nazwisko</label>
-                    <input type="text" id="nowy-autor-nazwa" required style="border: 1px solid #ddd; padding: 10px;">
+                    <label for="nowy-autor-nazwa">Imię i nazwisko <span style="color:#d9534f">*</span></label>
+                    <input type="text" id="nowy-autor-nazwa" required style="border: 1px solid #ddd; padding: 10px; border-radius: 4px;">
                 </div>
                 <div class="form-grupa">
                     <label for="nowy-autor-bio">Biografia</label>
-                    <textarea id="nowy-autor-bio" rows="3" style="border: 1px solid #ddd; padding: 10px;"></textarea>
+                    <textarea id="nowy-autor-bio" rows="3" style="border: 1px solid #ddd; padding: 10px; border-radius: 4px; resize: none;"></textarea>
                 </div>
                 <button type="submit" class="btn-akcja btn-duzy">Zapisz autora</button>
             </form>

@@ -152,6 +152,18 @@ button {
     flex-grow: 1; 
 }
 
+.klikany-autor {
+    color: #78b833;
+    cursor: pointer;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.klikany-autor:hover {
+    color: #5a8a26;
+    text-decoration: underline;
+}
+
 .form-grupa {
     margin-bottom: 25px;
 }
@@ -189,10 +201,23 @@ input, textarea, select {
     align-items: center;
     justify-content: center;
     border: 1px solid #eaeaea;
-    border-radius: 4px;
     color: #adb5bd;
     flex-shrink: 0;
-    overflow: hidden;
+}
+
+.domyslny-awatar {
+    width: 100%;
+    height: 100%;
+    background-color: #f0f2f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ced4da;
+}
+
+.domyslny-awatar svg {
+    width: 50%;
+    height: 50%;
 }
 
 .link-dodaj {
@@ -243,10 +268,34 @@ input, textarea, select {
     color: #333;
 }
 
-.pole-autora {
+.autor-foto-upload {
     display: flex;
-    gap: 10px;
-    margin-bottom: 10px;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.autor-foto-placeholder {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 2px dashed #ced4da;
+    background-color: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    overflow: hidden;
+    transition: border-color 0.2s;
+}
+
+.autor-foto-placeholder:hover {
+    border-color: #78b833;
+}
+
+#autor-foto-tekst {
+    color: #adb5bd;
+    font-size: 14px;
 }
 
 .btn-dodaj-autora {
