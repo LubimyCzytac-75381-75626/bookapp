@@ -709,7 +709,7 @@ formRecenzja.addEventListener('submit', (e) => {
         children: [] 
     };
 
-    fetch('/book-review/save', {
+    fetch('/book-review/save?parentId=', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
