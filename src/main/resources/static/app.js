@@ -232,7 +232,7 @@ function pobierzDaneSlownikowe() {
         })
         .catch(err => console.log('blad pobierania autorow', err));
 
-    fetch('/categories/')
+    fetch('/category/') // <-- ZWRÓCONO ORYGINALNY PUNKT KOŃCOWY
         .then(res => res.json())
         .then(dane => {
             pamiecKategorii = dane;
@@ -919,7 +919,8 @@ if (formRecenzja) {
             children: [] 
         };
 
-        fetch('/book-review/save', {
+        // ZWRÓCONO: ?parentId= do poprawnego działania endpointu u Tymofieja
+        fetch('/book-review/save?parentId=', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
