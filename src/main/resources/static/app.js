@@ -5,7 +5,8 @@ const btnPowrot = document.getElementById('btn-powrot');
 const btnPowrotZAutora = document.getElementById('btn-powrot-z-autora');
 const btnPowrotZDodaj = document.getElementById('btn-powrot-z-dodaj'); 
 const btnUsunAutora = document.getElementById('btn-usun-autora'); 
-const filtrKategorii = document.getElementById('filtr-kategorii'); // Nowy element: dropdown filtra
+const filtrKategorii = document.getElementById('filtr-kategorii'); 
+const wyszukiwarkaKsiazek = document.getElementById('wyszukiwarka-ksiazek'); // Nowy element: wyszukiwarka po nazwie
 
 const sekcjaLista = document.getElementById('sekcja-lista');
 const sekcjaDodaj = document.getElementById('sekcja-dodaj');
@@ -59,6 +60,17 @@ if (btnUsunAutora) {
 if (filtrKategorii) {
     filtrKategorii.addEventListener('change', () => {
         pobierzKsiazki();
+    });
+}
+
+// zdarzenie dla wyszukiwarki (z malym opoznieniem zeby nie spamowac serwera)
+if (wyszukiwarkaKsiazek) {
+    let timeoutWyszukiwarki;
+    wyszukiwarkaKsiazek.addEventListener('input', () => {
+        clearTimeout(timeoutWyszukiwarki);
+        timeoutWyszukiwarki = setTimeout(() => {
+            pobierzKsiazki();
+        }, 300);
     });
 }
 
@@ -171,7 +183,7 @@ function pobierzDaneSlownikowe() {
         .then(res => res.json())
         .then(dane => {
             pamiecKategorii = dane;
-            wypelnijFiltrKategorii(); // uzupelnienie drowdowna z kategoriami
+            wypelnijFiltrKategorii();
         })
         .catch(err => console.log('blad pobierania kategorii', err));
 }
@@ -368,10 +380,20 @@ function pobierzKsiazki() {
     const obszar = document.getElementById('lista-ksiazek-kontener');
     obszar.innerHTML = '<p class="pusty-stan">Ładowanie...</p>';
 
-    // ZMIANA: dynamiczne budowanie url w zaleznosci od wybranego filtra kategorii
+    // ZMIANA: dynamiczne budowanie url uwzgledniajace zarowno kategorie jak i wyszukiwarke tekstu
     let url = '/book/';
+    let parametry = [];
+
     if (filtrKategorii && filtrKategorii.value !== '') {
-        url = `/book/?categoryId=${filtrKategorii.value}`;
+        parametry.push(`categoryId=${filtrKategorii.value}`);
+    }
+    
+    if (wyszukiwarkaKsiazek && wyszukiwarkaKsiazek.value.trim() !== '') {
+        parametry.push(`name=${encodeURIComponent(wyszukiwarkaKsiazek.value.trim())}`);
+    }
+
+    if (parametry.length > 0) {
+        url += '?' + parametry.join('&');
     }
 
     fetch(url)
@@ -381,7 +403,7 @@ function pobierzKsiazki() {
             obszar.innerHTML = '';
             
             if(dane.length === 0) {
-                obszar.innerHTML = '<p class="pusty-stan">Brak książek w bazie.</p>';
+                obszar.innerHTML = '<p class="pusty-stan">Brak książek spełniających kryteria.</p>';
                 return;
             }
 
@@ -533,7 +555,6 @@ window.pokazDetale = function(id) {
     }
 }
 
-// pobieranie detali pojedynczego autora
 window.pokazDetaleAutora = function(id) {
     sprawdzanyAutorId = id;
 
@@ -564,7 +585,6 @@ window.pokazDetaleAutora = function(id) {
         .catch(err => console.log('blad pobierania danych autora', err));
 }
 
-// funkcja usuwania autora (powiązana ze statycznym HTML)
 window.usunAutora = function() {
     if (!sprawdzanyAutorId) return;
 
@@ -588,7 +608,6 @@ window.usunAutora = function() {
     }
 };
 
-// wyswietlanie listy ksiazek autora
 function pobierzKsiazkiAutora(authorId) {
     const obszar = document.getElementById('lista-ksiazek-autora');
     if (!obszar) return;
@@ -639,7 +658,6 @@ function pobierzKsiazkiAutora(authorId) {
         });
 }
 
-// pobieranie i wyswietlanie recenzji 
 function odswiezRecenzje(ksiazkaId) {
     const obszarRecenzji = document.getElementById('lista-recenzji');
     obszarRecenzji.innerHTML = '<p class="pusty-stan">Ładowanie recenzji...</p>';
@@ -720,7 +738,6 @@ function odswiezRecenzje(ksiazkaId) {
         });
 }
 
-// usuwanie pojedynczej recenzji
 window.usunRecenzje = function(id) {
     const pytanie = confirm("Czy na pewno chcesz usunąć tę recenzję/odpowiedź?");
     
@@ -732,7 +749,7 @@ window.usunRecenzje = function(id) {
             if (res.ok) {
                 alert("Recenzja została usunięta.");
                 odswiezRecenzje(sprawdzanaKsiazkaId);
-                pobierzKsiazki(); // odswiezenie by rating na liscie mogl sie zaktualizowac
+                pobierzKsiazki(); 
             } else {
                 alert("Wystąpił błąd podczas usuwania recenzji.");
             }
@@ -783,7 +800,7 @@ window.wyslijOdpowiedz = function(e, parentId) {
     })
     .then(() => {
         odswiezRecenzje(sprawdzanaKsiazkaId);
-        pobierzKsiazki(); // zeby oceny sie zaaktualizowaly
+        pobierzKsiazki(); 
     })
     .catch(err => {
         console.log('blad zapisu odpowiedzi', err);
@@ -823,7 +840,7 @@ formRecenzja.addEventListener('submit', (e) => {
     .then(() => {
         formRecenzja.reset();
         odswiezRecenzje(sprawdzanaKsiazkaId);
-        pobierzKsiazki(); // zeby zaktualizowac glowny rating ksiazki po ocenie
+        pobierzKsiazki(); 
     })
     .catch(err => {
         console.log('blad zapisu recenzji', err);
