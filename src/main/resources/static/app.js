@@ -33,9 +33,11 @@ btnLista.addEventListener('click', () => {
 
 btnDodaj.addEventListener('click', () => {
     edytowanaKsiazkaId = null;
-    document.getElementById('formularz-ksiazki').reset();
+    const formKsiazki = document.getElementById('formularz-ksiazki');
+    if (formKsiazki) formKsiazki.reset();
     zresetujPodgladOkladki();
-    document.getElementById('btn-zapisz').innerText = 'Zapisz książkę';
+    const btnZapisz = document.getElementById('btn-zapisz');
+    if (btnZapisz) btnZapisz.innerText = 'Zapisz książkę';
     pokazSekcje(sekcjaDodaj);
     inicjalizujDynamicznePola();
 });
@@ -59,6 +61,24 @@ if (btnPowrotZDodaj) {
 if (btnUsunAutora) {
     btnUsunAutora.addEventListener('click', () => {
         window.usunAutora();
+    });
+}
+
+// zdarzenie dla filtra kategorii
+if (filtrKategorii) {
+    filtrKategorii.addEventListener('change', () => {
+        pobierzKsiazki();
+    });
+}
+
+// zdarzenie dla wyszukiwarki
+if (wyszukiwarkaKsiazek) {
+    let timeoutWyszukiwarki;
+    wyszukiwarkaKsiazek.addEventListener('input', () => {
+        clearTimeout(timeoutWyszukiwarki);
+        timeoutWyszukiwarki = setTimeout(() => {
+            pobierzKsiazki();
+        }, 300);
     });
 }
 
@@ -103,24 +123,6 @@ if (btnEdytujKsiazke) {
     });
 }
 
-// zdarzenie dla filtra kategorii
-if (filtrKategorii) {
-    filtrKategorii.addEventListener('change', () => {
-        pobierzKsiazki();
-    });
-}
-
-// zdarzenie dla wyszukiwarki 
-if (wyszukiwarkaKsiazek) {
-    let timeoutWyszukiwarki;
-    wyszukiwarkaKsiazek.addEventListener('input', () => {
-        clearTimeout(timeoutWyszukiwarki);
-        timeoutWyszukiwarki = setTimeout(() => {
-            pobierzKsiazki();
-        }, 300);
-    });
-}
-
 // dynamiczna wysokosc opisu
 const poleOpis = document.getElementById('opis');
 if (poleOpis) {
@@ -136,13 +138,17 @@ const btnOtworzModal = document.getElementById('otworz-modal-autora');
 const btnZamknijModal = document.getElementById('zamknij-modal');
 const formularzAutora = document.getElementById('formularz-autora');
 
-btnOtworzModal.addEventListener('click', () => {
-    modalAutor.style.display = 'flex';
-});
+if (btnOtworzModal) {
+    btnOtworzModal.addEventListener('click', () => {
+        modalAutor.style.display = 'flex';
+    });
+}
 
-btnZamknijModal.addEventListener('click', () => {
-    modalAutor.style.display = 'none';
-});
+if (btnZamknijModal) {
+    btnZamknijModal.addEventListener('click', () => {
+        modalAutor.style.display = 'none';
+    });
+}
 
 // obsluga zdjecia autora w formularzu
 let plikAutora = null;
@@ -226,7 +232,7 @@ function pobierzDaneSlownikowe() {
         })
         .catch(err => console.log('blad pobierania autorow', err));
 
-    fetch('/category/')
+    fetch('/categories/')
         .then(res => res.json())
         .then(dane => {
             pamiecKategorii = dane;
@@ -235,6 +241,7 @@ function pobierzDaneSlownikowe() {
         .catch(err => console.log('blad pobierania kategorii', err));
 }
 
+// wypelnianie elementu select w HTML danymi z API
 function wypelnijFiltrKategorii() {
     if (!filtrKategorii) return;
     filtrKategorii.innerHTML = '<option value="">Wszystkie</option>';
@@ -252,14 +259,16 @@ function inicjalizujDynamicznePola() {
     const kontenerAutorow = document.getElementById('kontener-autorow');
     const kontenerKategorii = document.getElementById('kontener-kategorii');
     
-    kontenerAutorow.innerHTML = '';
-    kontenerKategorii.innerHTML = '';
+    if (kontenerAutorow) kontenerAutorow.innerHTML = '';
+    if (kontenerKategorii) kontenerKategorii.innerHTML = '';
 
     dodajWierszZLista(kontenerAutorow, pamiecAutorow, 'id-wybranego-autora', 'Wpisz min. 3 znaki lub kliknij...', true);
     dodajWierszZLista(kontenerKategorii, pamiecKategorii, 'id-wybranej-kategorii', 'Wpisz min. 3 znaki lub kliknij...', true);
 }
 
 function dodajWierszZLista(kontener, dane, klasaDlaId, placeholder, toPierwszy, poczatkoweId = null, poczatkowaNazwa = '') {
+    if (!kontener) return;
+
     const wiersz = document.createElement('div');
     wiersz.className = 'dynamiczny-wiersz';
 
@@ -271,12 +280,12 @@ function dodajWierszZLista(kontener, dane, klasaDlaId, placeholder, toPierwszy, 
     poleTekstowe.placeholder = placeholder;
     poleTekstowe.required = true;
     poleTekstowe.autocomplete = 'off';
-    poleTekstowe.value = poczatkowaNazwa; 
+    poleTekstowe.value = poczatkowaNazwa;
 
     const ukryteId = document.createElement('input');
     ukryteId.type = 'hidden';
     ukryteId.className = klasaDlaId;
-    ukryteId.value = poczatkoweId || ''; 
+    ukryteId.value = poczatkoweId || '';
 
     const divZLista = document.createElement('div');
     divZLista.className = 'autocomplete-lista';
@@ -378,46 +387,48 @@ function budujPozycjeListy(listaElement, elementy, poleElement, ukryteIdElement)
 }
 
 // zapis nowego autora do bazy
-formularzAutora.addEventListener('submit', (e) => {
-    e.preventDefault();
+if (formularzAutora) {
+    formularzAutora.addEventListener('submit', (e) => {
+        e.preventDefault();
 
-    const nowyAutor = {
-        name: document.getElementById('nowy-autor-nazwa').value.trim(),
-        biography: document.getElementById('nowy-autor-bio').value.trim()
-    };
+        const nowyAutor = {
+            name: document.getElementById('nowy-autor-nazwa').value.trim(),
+            biography: document.getElementById('nowy-autor-bio').value.trim()
+        };
 
-    fetch('/author/save', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(nowyAutor)
-    })
-    .then(res => {
-        if (!res.ok) throw new Error("Błąd z serwerem");
-        return res.json();
-    })
-    .then(zapisanyAutor => {
-        if (plikAutora && zapisanyAutor && zapisanyAutor.id) {
-            const formData = new FormData();
-            formData.append('file', plikAutora);
+        fetch('/author/save', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(nowyAutor)
+        })
+        .then(res => {
+            if (!res.ok) throw new Error("Błąd z serwerem");
+            return res.json();
+        })
+        .then(zapisanyAutor => {
+            if (plikAutora && zapisanyAutor && zapisanyAutor.id) {
+                const formData = new FormData();
+                formData.append('file', plikAutora);
 
-            return fetch(`/author/${zapisanyAutor.id}/photo`, {
-                method: 'POST',
-                body: formData
-            });
-        }
-        return Promise.resolve();
-    })
-    .then(() => {
-        modalAutor.style.display = 'none';
-        formularzAutora.reset();
-        zresetujPodgladAutora();
-        pobierzDaneSlownikowe();
-        alert('Autor został dodany do bazy!');
-    })
-    .catch(err => console.log('blad zapisu autora', err));
-});
+                return fetch(`/author/${zapisanyAutor.id}/photo`, {
+                    method: 'POST',
+                    body: formData
+                });
+            }
+            return Promise.resolve();
+        })
+        .then(() => {
+            modalAutor.style.display = 'none';
+            formularzAutora.reset();
+            zresetujPodgladAutora();
+            pobierzDaneSlownikowe();
+            alert('Autor został dodany do bazy!');
+        })
+        .catch(err => console.log('blad zapisu autora', err));
+    });
+}
 
 // logika ksiazek i szczegolow
 let listaPobranychKsiazek = [];
@@ -426,6 +437,8 @@ let sprawdzanyAutorId = null;
 
 function pobierzKsiazki() {
     const obszar = document.getElementById('lista-ksiazek-kontener');
+    if (!obszar) return;
+    
     obszar.innerHTML = '<p class="pusty-stan">Ładowanie...</p>';
 
     let url = '/book/';
@@ -490,90 +503,93 @@ function pobierzKsiazki() {
         });
 }
 
+// zapis ksiazki
 const formKsiazki = document.getElementById('formularz-ksiazki');
+if (formKsiazki) {
+    formKsiazki.addEventListener('submit', (e) => {
+        e.preventDefault();
 
-formKsiazki.addEventListener('submit', (e) => {
-    e.preventDefault();
+        const autorzyPola = document.querySelectorAll('.id-wybranego-autora');
+        const zebraniAutorzy = [];
+        autorzyPola.forEach(p => {
+            if(p.value) zebraniAutorzy.push({ id: parseInt(p.value) });
+        });
 
-    const autorzyPola = document.querySelectorAll('.id-wybranego-autora');
-    const zebraniAutorzy = [];
-    autorzyPola.forEach(p => {
-        if(p.value) zebraniAutorzy.push({ id: parseInt(p.value) });
-    });
+        const kategoriePola = document.querySelectorAll('.id-wybranej-kategorii');
+        const zebraneKategorie = [];
+        kategoriePola.forEach(p => {
+            if(p.value) zebraneKategorie.push({ id: parseInt(p.value) });
+        });
 
-    const kategoriePola = document.querySelectorAll('.id-wybranej-kategorii');
-    const zebraneKategorie = [];
-    kategoriePola.forEach(p => {
-        if(p.value) zebraneKategorie.push({ id: parseInt(p.value) });
-    });
-
-    if(zebraniAutorzy.length === 0) {
-        alert("Musisz wybrać prawidłowego autora z listy!");
-        return;
-    }
-
-    if(zebraneKategorie.length === 0) {
-        alert("Musisz wybrać prawidłową kategorię z listy!");
-        return;
-    }
-
-    const poleOpcjonalneOpis = document.getElementById('opis');
-    
-    const ksiazkaDane = {
-        name: document.getElementById('tytul').value.trim(),
-        description: poleOpcjonalneOpis ? poleOpcjonalneOpis.value.trim() : "",
-        bookYear: parseInt(document.getElementById('rok').value),
-        authors: zebraniAutorzy,
-        categories: zebraneKategorie
-    };
-
-    if (edytowanaKsiazkaId !== null) {
-        ksiazkaDane.id = edytowanaKsiazkaId;
-        const istniejacaKsiazka = listaPobranychKsiazek.find(k => k.id === edytowanaKsiazkaId);
-        ksiazkaDane.rating = istniejacaKsiazka ? istniejacaKsiazka.rating : 0;
-    } else {
-        ksiazkaDane.rating = 0;
-    }
-
-    fetch('/book/save', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(ksiazkaDane)
-    })
-    .then(res => {
-        if (!res.ok) throw new Error("Błąd podczas zapisywania książki. Sprawdź serwer.");
-        return res.json();
-    })
-    .then(zapisanaKsiazka => {
-        if (plikOkladki && zapisanaKsiazka && zapisanaKsiazka.id) {
-            const formData = new FormData();
-            formData.append('file', plikOkladki);
-
-            return fetch(`/book/${zapisanaKsiazka.id}/cover`, {
-                method: 'POST',
-                body: formData
-            });
+        if(zebraniAutorzy.length === 0) {
+            alert("Musisz wybrać prawidłowego autora z listy!");
+            return;
         }
-        return Promise.resolve();
-    })
-    .then(() => {
-        formKsiazki.reset();
-        zresetujPodgladOkladki();
-        if (poleOpcjonalneOpis) {
-            poleOpcjonalneOpis.style.height = 'auto';
-        }
-        edytowanaKsiazkaId = null; 
-        pokazSekcje(sekcjaLista);
-        pobierzKsiazki();
-    })
-    .catch(err => {
-        console.log('blad zapisu ksiazki', err);
-        alert("Zapisywanie nie powiodło się! Sprawdź czy wybrałeś dane z listy.");
-    });
-});
 
+        if(zebraneKategorie.length === 0) {
+            alert("Musisz wybrać prawidłową kategorię z listy!");
+            return;
+        }
+
+        const poleOpcjonalneOpis = document.getElementById('opis');
+        
+        const ksiazkaDane = {
+            name: document.getElementById('tytul').value.trim(),
+            description: poleOpcjonalneOpis ? poleOpcjonalneOpis.value.trim() : "",
+            bookYear: parseInt(document.getElementById('rok').value),
+            authors: zebraniAutorzy,
+            categories: zebraneKategorie
+        };
+
+        if (edytowanaKsiazkaId !== null) {
+            ksiazkaDane.id = edytowanaKsiazkaId;
+            const istniejacaKsiazka = listaPobranychKsiazek.find(k => k.id === edytowanaKsiazkaId);
+            ksiazkaDane.rating = istniejacaKsiazka ? istniejacaKsiazka.rating : 0;
+        } else {
+            ksiazkaDane.rating = 0;
+        }
+
+        fetch('/book/save', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(ksiazkaDane)
+        })
+        .then(res => {
+            if (!res.ok) throw new Error("Błąd podczas zapisywania książki. Sprawdź serwer.");
+            return res.json();
+        })
+        .then(zapisanaKsiazka => {
+            if (plikOkladki && zapisanaKsiazka && zapisanaKsiazka.id) {
+                const formData = new FormData();
+                formData.append('file', plikOkladki);
+
+                return fetch(`/book/${zapisanaKsiazka.id}/cover`, {
+                    method: 'POST',
+                    body: formData
+                });
+            }
+            return Promise.resolve();
+        })
+        .then(() => {
+            formKsiazki.reset();
+            zresetujPodgladOkladki();
+            if (poleOpcjonalneOpis) {
+                poleOpcjonalneOpis.style.height = 'auto';
+            }
+            edytowanaKsiazkaId = null; 
+            pokazSekcje(sekcjaLista);
+            pobierzKsiazki();
+        })
+        .catch(err => {
+            console.log('blad zapisu ksiazki', err);
+            alert("Zapisywanie nie powiodło się! Sprawdź czy wybrałeś dane z listy.");
+        });
+    });
+}
+
+// detale ksiazki
 window.pokazDetale = function(id) {
     const k = listaPobranychKsiazek.find(szukana => szukana.id === id);
 
@@ -728,9 +744,11 @@ function pobierzKsiazkiAutora(authorId) {
         });
 }
 
-// pobieranie i wyswietlanie recenzji 
+// pobieranie i wyswietlanie recenzji
 function odswiezRecenzje(ksiazkaId) {
     const obszarRecenzji = document.getElementById('lista-recenzji');
+    if (!obszarRecenzji) return;
+    
     obszarRecenzji.innerHTML = '<p class="pusty-stan">Ładowanie recenzji...</p>';
 
     fetch(`/book-review/?bookId=${ksiazkaId}`)
@@ -835,6 +853,7 @@ window.usunRecenzje = function(id) {
     }
 };
 
+// formularz odpowiedzi
 window.pokazFormularzOdpowiedzi = function(id, przycisk) {
     const kontener = przycisk.parentElement.nextElementSibling;
     if (kontener.style.display === 'none') {
@@ -885,65 +904,73 @@ window.wyslijOdpowiedz = function(e, parentId) {
     });
 };
 
-formRecenzja.addEventListener('submit', (e) => {
-    e.preventDefault();
-    if(!sprawdzanaKsiazkaId) return;
+// zapis nowej recenzji do bazy
+const formRecenzja = document.getElementById('formularz-recenzji');
+if (formRecenzja) {
+    formRecenzja.addEventListener('submit', (e) => {
+        e.preventDefault();
+        if(!sprawdzanaKsiazkaId) return;
 
-    const recenzjaDane = {
-        book: { id: sprawdzanaKsiazkaId },
-        userName: document.getElementById('recenzja-autor').value.trim(),
-        grade: parseInt(document.getElementById('recenzja-ocena').value),
-        reviewText: document.getElementById('recenzja-tekst').value.trim(),
-        children: [] 
-    };
+        const recenzjaDane = {
+            book: { id: sprawdzanaKsiazkaId },
+            userName: document.getElementById('recenzja-autor').value.trim(),
+            grade: parseInt(document.getElementById('recenzja-ocena').value),
+            reviewText: document.getElementById('recenzja-tekst').value.trim(),
+            children: [] 
+        };
 
-    fetch('/book-review/save?parentId=', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(recenzjaDane)
-    })
-    .then(async res => {
-        if (!res.ok) {
-            const errorText = await res.text();
-            console.error("Błąd serwera:", errorText);
-            throw new Error(errorText);
-        }
-        return res.json();
-    })
-    .then(() => {
-        formRecenzja.reset();
-        odswiezRecenzje(sprawdzanaKsiazkaId);
-        pobierzKsiazki(); 
-    })
-    .catch(err => {
-        console.log('blad zapisu recenzji', err);
-        alert("Nie udało się dodać recenzji. Sprawdź konsolę.");
-    });
-});
-
-przyciskUsun.addEventListener('click', () => {
-    if (!sprawdzanaKsiazkaId) return;
-
-    const pytanie = confirm("Czy na pewno chcesz usunąć tę książkę z bazy?");
-    
-    if (pytanie) {
-        fetch(`/book/${sprawdzanaKsiazkaId}`, {
-            method: 'DELETE'
+        fetch('/book-review/save', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(recenzjaDane)
         })
-        .then(res => {
-            if (res.ok) {
-                alert("Książka została usunięta.");
-                pokazSekcje(sekcjaLista);
-                pobierzKsiazki();
-            } else {
-                alert("Wystąpił błąd podczas usuwania.");
+        .then(async res => {
+            if (!res.ok) {
+                const errorText = await res.text();
+                console.error("Błąd serwera:", errorText);
+                throw new Error(errorText);
             }
+            return res.json();
         })
-        .catch(err => console.log('blad usuwania', err));
-    }
-});
+        .then(() => {
+            formRecenzja.reset();
+            odswiezRecenzje(sprawdzanaKsiazkaId);
+            pobierzKsiazki(); 
+        })
+        .catch(err => {
+            console.log('blad zapisu recenzji', err);
+            alert("Nie udało się dodać recenzji. Sprawdź konsolę.");
+        });
+    });
+}
+
+// usuwanie ksiazki
+const przyciskUsun = document.getElementById('btn-usun-ksiazke');
+if (przyciskUsun) {
+    przyciskUsun.addEventListener('click', () => {
+        if (!sprawdzanaKsiazkaId) return;
+
+        const pytanie = confirm("Czy na pewno chcesz usunąć tę książkę z bazy?");
+        
+        if (pytanie) {
+            fetch(`/book/${sprawdzanaKsiazkaId}`, {
+                method: 'DELETE'
+            })
+            .then(res => {
+                if (res.ok) {
+                    alert("Książka została usunięta.");
+                    pokazSekcje(sekcjaLista);
+                    pobierzKsiazki();
+                } else {
+                    alert("Wystąpił błąd podczas usuwania.");
+                }
+            })
+            .catch(err => console.log('blad usuwania', err));
+        }
+    });
+}
 
 // zaladowanie na starcie
 pobierzDaneSlownikowe();
