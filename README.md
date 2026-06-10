@@ -1,10 +1,11 @@
-# Bookapp - frontend
 ## Autorzy Projektu
 
 Projekt został zrealizowany w ramach współpracy zespołowej o jasnym podziale obowiązków:
 
 * **Frontend Development & UI/UX:** Oleksandr Mandziuk (Numer albumu: 75381)
-* **Backend Development (REST API):** Tymofii Salashnik (Numer albumu: 75626) 
+* **Backend Development (REST API):** Tymofii Salashnik (Numer albumu: 75626)
+
+# Bookapp - frontend
 
 # Katalog Książek – Aplikacja Frontendowa
 
