@@ -6,7 +6,8 @@ const btnPowrotZAutora = document.getElementById('btn-powrot-z-autora');
 const btnPowrotZDodaj = document.getElementById('btn-powrot-z-dodaj'); 
 const btnUsunAutora = document.getElementById('btn-usun-autora'); 
 const filtrKategorii = document.getElementById('filtr-kategorii'); 
-const wyszukiwarkaKsiazek = document.getElementById('wyszukiwarka-ksiazek'); // Nowy element: wyszukiwarka po nazwie
+const wyszukiwarkaKsiazek = document.getElementById('wyszukiwarka-ksiazek');
+const btnEdytujKsiazke = document.getElementById('btn-edytuj-ksiazke'); 
 
 const sekcjaLista = document.getElementById('sekcja-lista');
 const sekcjaDodaj = document.getElementById('sekcja-dodaj');
@@ -14,6 +15,7 @@ const sekcjaSzczegoly = document.getElementById('sekcja-szczegoly');
 const sekcjaAutorSzczegoly = document.getElementById('sekcja-autor-szczegoly');
 
 let skadWidokAutora = sekcjaLista;
+let edytowanaKsiazkaId = null; 
 
 // zarzadzanie sekcjami
 function pokazSekcje(sekcja) {
@@ -30,6 +32,10 @@ btnLista.addEventListener('click', () => {
 });
 
 btnDodaj.addEventListener('click', () => {
+    edytowanaKsiazkaId = null;
+    document.getElementById('formularz-ksiazki').reset();
+    zresetujPodgladOkladki();
+    document.getElementById('btn-zapisz').innerText = 'Zapisz książkę';
     pokazSekcje(sekcjaDodaj);
     inicjalizujDynamicznePola();
 });
@@ -56,6 +62,47 @@ if (btnUsunAutora) {
     });
 }
 
+// logika edycji ksiazki
+if (btnEdytujKsiazke) {
+    btnEdytujKsiazke.addEventListener('click', () => {
+        const k = listaPobranychKsiazek.find(szukana => szukana.id === sprawdzanaKsiazkaId);
+        if (!k) return;
+
+        edytowanaKsiazkaId = k.id;
+        
+        document.getElementById('tytul').value = k.name;
+        document.getElementById('rok').value = k.bookYear;
+        const poleOpis = document.getElementById('opis');
+        if (poleOpis) poleOpis.value = k.description ? k.description : "";
+        
+        const kontenerAutorow = document.getElementById('kontener-autorow');
+        const kontenerKategorii = document.getElementById('kontener-kategorii');
+        kontenerAutorow.innerHTML = '';
+        kontenerKategorii.innerHTML = '';
+
+        if (k.authors && k.authors.length > 0) {
+            k.authors.forEach((a, index) => {
+                dodajWierszZLista(kontenerAutorow, pamiecAutorow, 'id-wybranego-autora', 'Wpisz min. 3 znaki lub kliknij...', index === 0, a.id, a.name);
+            });
+        } else {
+            dodajWierszZLista(kontenerAutorow, pamiecAutorow, 'id-wybranego-autora', 'Wpisz min. 3 znaki lub kliknij...', true);
+        }
+
+        if (k.categories && k.categories.length > 0) {
+            k.categories.forEach((c, index) => {
+                dodajWierszZLista(kontenerKategorii, pamiecKategorii, 'id-wybranej-kategorii', 'Wpisz min. 3 znaki lub kliknij...', index === 0, c.id, c.name);
+            });
+        } else {
+            dodajWierszZLista(kontenerKategorii, pamiecKategorii, 'id-wybranej-kategorii', 'Wpisz min. 3 znaki lub kliknij...', true);
+        }
+
+        zresetujPodgladOkladki();
+        document.getElementById('btn-zapisz').innerText = 'Zaktualizuj książkę';
+
+        pokazSekcje(sekcjaDodaj);
+    });
+}
+
 // zdarzenie dla filtra kategorii
 if (filtrKategorii) {
     filtrKategorii.addEventListener('change', () => {
@@ -63,7 +110,7 @@ if (filtrKategorii) {
     });
 }
 
-// zdarzenie dla wyszukiwarki (z malym opoznieniem zeby nie spamowac serwera)
+// zdarzenie dla wyszukiwarki 
 if (wyszukiwarkaKsiazek) {
     let timeoutWyszukiwarki;
     wyszukiwarkaKsiazek.addEventListener('input', () => {
@@ -188,7 +235,6 @@ function pobierzDaneSlownikowe() {
         .catch(err => console.log('blad pobierania kategorii', err));
 }
 
-// wypelnianie elementu select w HTML danymi z API
 function wypelnijFiltrKategorii() {
     if (!filtrKategorii) return;
     filtrKategorii.innerHTML = '<option value="">Wszystkie</option>';
@@ -213,7 +259,7 @@ function inicjalizujDynamicznePola() {
     dodajWierszZLista(kontenerKategorii, pamiecKategorii, 'id-wybranej-kategorii', 'Wpisz min. 3 znaki lub kliknij...', true);
 }
 
-function dodajWierszZLista(kontener, dane, klasaDlaId, placeholder, toPierwszy) {
+function dodajWierszZLista(kontener, dane, klasaDlaId, placeholder, toPierwszy, poczatkoweId = null, poczatkowaNazwa = '') {
     const wiersz = document.createElement('div');
     wiersz.className = 'dynamiczny-wiersz';
 
@@ -225,10 +271,12 @@ function dodajWierszZLista(kontener, dane, klasaDlaId, placeholder, toPierwszy) 
     poleTekstowe.placeholder = placeholder;
     poleTekstowe.required = true;
     poleTekstowe.autocomplete = 'off';
+    poleTekstowe.value = poczatkowaNazwa; 
 
     const ukryteId = document.createElement('input');
     ukryteId.type = 'hidden';
     ukryteId.className = klasaDlaId;
+    ukryteId.value = poczatkoweId || ''; 
 
     const divZLista = document.createElement('div');
     divZLista.className = 'autocomplete-lista';
@@ -380,7 +428,6 @@ function pobierzKsiazki() {
     const obszar = document.getElementById('lista-ksiazek-kontener');
     obszar.innerHTML = '<p class="pusty-stan">Ładowanie...</p>';
 
-    // ZMIANA: dynamiczne budowanie url uwzgledniajace zarowno kategorie jak i wyszukiwarke tekstu
     let url = '/book/';
     let parametry = [];
 
@@ -416,6 +463,11 @@ function pobierzKsiazki() {
                     tekstAutorow = k.authors.map(a => `<span class="klikany-autor" onclick="skadWidokAutora = sekcjaLista; pokazDetaleAutora(${a.id}); event.stopPropagation();">${a.name}</span>`).join(', ');
                 }
 
+                let tekstKategoriiKarta = "Brak kategorii";
+                if(k.categories && k.categories.length > 0) {
+                    tekstKategoriiKarta = k.categories.map(c => c.name).join(', ');
+                }
+
                 ramka.innerHTML = `
                     <img src="/book/${k.id}/cover" class="karta-img" onerror="this.outerHTML='<div class=\\'karta-okladka-zastepcza\\'>Brak okładki</div>'">
                     <div class="karta-info">
@@ -423,7 +475,8 @@ function pobierzKsiazki() {
                             <h3 class="karta-tytul" style="margin-right: 10px;">${k.name}</h3>
                             <span style="background-color: #ffc107; color: #000; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; white-space: nowrap;">★ ${k.rating > 0 ? k.rating + '/10' : 'Brak'}</span>
                         </div>
-                        <p class="karta-autor">${tekstAutorow}</p>
+                        <p class="karta-autor" style="margin-bottom: 5px;">${tekstAutorow}</p>
+                        <p style="font-size: 11px; color: #6a7482; margin-bottom: 5px; font-weight: 500;">Kategoria: ${tekstKategoriiKarta}</p>
                         <p style="font-size: 12px; color: #666; margin-bottom: 10px;">Rok: ${k.bookYear}</p>
                         <button class="btn-akcja btn-maly" onclick="pokazDetale(${k.id})">Szczegóły</button>
                     </div>
@@ -467,13 +520,20 @@ formKsiazki.addEventListener('submit', (e) => {
     const poleOpcjonalneOpis = document.getElementById('opis');
     
     const ksiazkaDane = {
-        rating: 0, 
         name: document.getElementById('tytul').value.trim(),
         description: poleOpcjonalneOpis ? poleOpcjonalneOpis.value.trim() : "",
         bookYear: parseInt(document.getElementById('rok').value),
         authors: zebraniAutorzy,
         categories: zebraneKategorie
     };
+
+    if (edytowanaKsiazkaId !== null) {
+        ksiazkaDane.id = edytowanaKsiazkaId;
+        const istniejacaKsiazka = listaPobranychKsiazek.find(k => k.id === edytowanaKsiazkaId);
+        ksiazkaDane.rating = istniejacaKsiazka ? istniejacaKsiazka.rating : 0;
+    } else {
+        ksiazkaDane.rating = 0;
+    }
 
     fetch('/book/save', {
         method: 'POST',
@@ -504,6 +564,7 @@ formKsiazki.addEventListener('submit', (e) => {
         if (poleOpcjonalneOpis) {
             poleOpcjonalneOpis.style.height = 'auto';
         }
+        edytowanaKsiazkaId = null; 
         pokazSekcje(sekcjaLista);
         pobierzKsiazki();
     })
@@ -555,6 +616,7 @@ window.pokazDetale = function(id) {
     }
 }
 
+// pobieranie detali pojedynczego autora
 window.pokazDetaleAutora = function(id) {
     sprawdzanyAutorId = id;
 
@@ -585,6 +647,7 @@ window.pokazDetaleAutora = function(id) {
         .catch(err => console.log('blad pobierania danych autora', err));
 }
 
+// funkcja usuwania autora
 window.usunAutora = function() {
     if (!sprawdzanyAutorId) return;
 
@@ -608,6 +671,7 @@ window.usunAutora = function() {
     }
 };
 
+// wyswietlanie listy ksiazek autora
 function pobierzKsiazkiAutora(authorId) {
     const obszar = document.getElementById('lista-ksiazek-autora');
     if (!obszar) return;
@@ -637,6 +701,11 @@ function pobierzKsiazkiAutora(authorId) {
                     tekstAutorow = k.authors.map(a => `<span class="klikany-autor" onclick="skadWidokAutora = sekcjaAutorSzczegoly; pokazDetaleAutora(${a.id}); event.stopPropagation();">${a.name}</span>`).join(', ');
                 }
 
+                let tekstKategoriiKarta = "Brak kategorii";
+                if(k.categories && k.categories.length > 0) {
+                    tekstKategoriiKarta = k.categories.map(c => c.name).join(', ');
+                }
+
                 ramka.innerHTML = `
                     <img src="/book/${k.id}/cover" class="karta-img" onerror="this.outerHTML='<div class=\\'karta-okladka-zastepcza\\'>Brak okładki</div>'">
                     <div class="karta-info">
@@ -644,7 +713,8 @@ function pobierzKsiazkiAutora(authorId) {
                             <h3 class="karta-tytul" style="margin-right: 10px;">${k.name}</h3>
                             <span style="background-color: #ffc107; color: #000; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; white-space: nowrap;">★ ${k.rating > 0 ? k.rating + '/10' : 'Brak'}</span>
                         </div>
-                        <p class="karta-autor">${tekstAutorow}</p>
+                        <p class="karta-autor" style="margin-bottom: 5px;">${tekstAutorow}</p>
+                        <p style="font-size: 11px; color: #6a7482; margin-bottom: 5px; font-weight: 500;">Kategoria: ${tekstKategoriiKarta}</p>
                         <p style="font-size: 12px; color: #666; margin-bottom: 10px;">Rok: ${k.bookYear}</p>
                         <button class="btn-akcja btn-maly" onclick="pokazDetale(${k.id})">Szczegóły</button>
                     </div>
@@ -658,6 +728,7 @@ function pobierzKsiazkiAutora(authorId) {
         });
 }
 
+// pobieranie i wyswietlanie recenzji 
 function odswiezRecenzje(ksiazkaId) {
     const obszarRecenzji = document.getElementById('lista-recenzji');
     obszarRecenzji.innerHTML = '<p class="pusty-stan">Ładowanie recenzji...</p>';
@@ -676,7 +747,7 @@ function odswiezRecenzje(ksiazkaId) {
             let sumaOcen = 0;
             let liczbaOcen = 0;
 
-            function renderujDrzewo(lista, kontener, poziom = 0) {
+            function renderujDrzewo(lista, kontener, poziom = 0, nazwaRodzica = null) {
                 lista.forEach(r => {
                     if (poziom === 0 && r.grade > 0) {
                         sumaOcen += r.grade;
@@ -688,15 +759,20 @@ function odswiezRecenzje(ksiazkaId) {
                     
                     if (poziom > 0) {
                         klocek.classList.add('karta-recenzji-wciecie');
+                        klocek.style.marginLeft = `${poziom * 30}px`;
                     }
 
                     const znaczekOceny = r.grade > 0 
                         ? `<span class="recenzja-ocena">${r.grade}/10</span>` 
                         : `<span class="recenzja-ocena-odpowiedz">Odpowiedź</span>`;
 
+                    const wyswietlanaNazwa = (poziom > 0 && nazwaRodzica) 
+                        ? `${r.userName} <span style="color: #6a7482; font-size: 13px; font-weight: normal; margin-left: 5px;">&rarr; ${nazwaRodzica}</span>`
+                        : r.userName;
+
                     klocek.innerHTML = `
                         <div class="recenzja-naglowek">
-                            <span class="recenzja-autor">${r.userName}</span>
+                            <span class="recenzja-autor">${wyswietlanaNazwa}</span>
                             ${znaczekOceny}
                         </div>
                         <div class="recenzja-tekst">"${r.reviewText}"</div>
@@ -708,8 +784,8 @@ function odswiezRecenzje(ksiazkaId) {
                         
                         <div class="formularz-odpowiedzi" style="display: none; margin-top: 15px; padding-top: 10px; border-top: 1px dashed #eaeaea;">
                             <form onsubmit="wyslijOdpowiedz(event, ${r.id})">
-                                <input type="text" class="odp-autor" placeholder="Twoje imię / nick" required style="width: 100%; margin-bottom: 10px; padding: 8px; border: 1px solid #ddd;">
-                                <textarea class="odp-tekst" rows="2" placeholder="Napisz odpowiedź..." required style="width: 100%; margin-bottom: 10px; padding: 8px; border: 1px solid #ddd;"></textarea>
+                                <input type="text" class="odp-autor" placeholder="Twoje imię / nick" required style="width: 100%; box-sizing: border-box; margin-bottom: 10px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                <textarea class="odp-tekst" rows="2" placeholder="Napisz odpowiedź..." required style="width: 100%; box-sizing: border-box; margin-bottom: 10px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; resize: vertical;"></textarea>
                                 <button type="submit" class="btn-akcja btn-maly" style="width: auto;">Wyślij odpowiedź</button>
                             </form>
                         </div>
@@ -718,7 +794,7 @@ function odswiezRecenzje(ksiazkaId) {
                     kontener.appendChild(klocek);
 
                     if (r.children && r.children.length > 0) {
-                        renderujDrzewo(r.children, kontener, poziom + 1);
+                        renderujDrzewo(r.children, kontener, poziom + 1, r.userName);
                     }
                 });
             }
@@ -738,6 +814,7 @@ function odswiezRecenzje(ksiazkaId) {
         });
 }
 
+// usuwanie pojedynczej recenzji
 window.usunRecenzje = function(id) {
     const pytanie = confirm("Czy na pewno chcesz usunąć tę recenzję/odpowiedź?");
     
@@ -808,8 +885,6 @@ window.wyslijOdpowiedz = function(e, parentId) {
     });
 };
 
-const formRecenzja = document.getElementById('formularz-recenzji');
-
 formRecenzja.addEventListener('submit', (e) => {
     e.preventDefault();
     if(!sprawdzanaKsiazkaId) return;
@@ -847,8 +922,6 @@ formRecenzja.addEventListener('submit', (e) => {
         alert("Nie udało się dodać recenzji. Sprawdź konsolę.");
     });
 });
-
-const przyciskUsun = document.getElementById('btn-usun-ksiazke');
 
 przyciskUsun.addEventListener('click', () => {
     if (!sprawdzanaKsiazkaId) return;
