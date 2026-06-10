@@ -39,7 +39,8 @@ public class BookReview {
 
     @ManyToOne
     @JoinColumn(name = "book_id")
-    Book book;
+    @org.hibernate.annotations.OnDelete(action = org.hibernate.annotations.OnDeleteAction.CASCADE)
+    private Book book;
 
     @Column(name = "user_name")
     String userName;
