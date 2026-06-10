@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import lombok.extern.slf4j.Slf4j;
 import pl.vistula.bookapp.jpa.model.Book;
+import pl.vistula.bookapp.jpa.model.BookReview;
 import pl.vistula.bookapp.jpa.repository.BookRepository;
 import pl.vistula.bookapp.jpa.repository.BookReviewRepository;
 
@@ -22,7 +24,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
 
 @RestController
 @Slf4j
@@ -89,12 +90,13 @@ public class BookController {
     }
 
     @DeleteMapping("/{id}")
+    @Transactional
     void delete(@PathVariable Long id) {
         log.info("Deleting book with id: {}", id);
-        bookReviewRepository.deleteByBookId(id);
+        List<BookReview> reviews = bookReviewRepository.findByBookId(id);
+        bookReviewRepository.deleteAll(reviews);
         bookRepository.deleteById(id);
     }
-
 
     @PostMapping("/{id}/cover")
     public ResponseEntity<Void> setCover(@PathVariable Long id, @RequestParam("file") MultipartFile file) throws IOException {
@@ -112,7 +114,7 @@ public class BookController {
     }
 
     @GetMapping(value = "/{id}/cover", produces = MediaType.IMAGE_PNG_VALUE)
-   public ResponseEntity<byte[]> getCover(@PathVariable Long id) {
+    public ResponseEntity<byte[]> getCover(@PathVariable Long id) {
         log.info("get book cover: {}", id);
       
         return bookRepository.findById(id)
@@ -134,4 +136,4 @@ public class BookController {
             .orElse(ResponseEntity.notFound().<Void>build());
     }
 
-  }
+}
