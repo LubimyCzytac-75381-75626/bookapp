@@ -354,7 +354,10 @@ function pobierzKsiazki() {
                 ramka.innerHTML = `
                     <img src="/book/${k.id}/cover" class="karta-img" onerror="this.outerHTML='<div class=\\'karta-okladka-zastepcza\\'>Brak okładki</div>'">
                     <div class="karta-info">
-                        <h3 class="karta-tytul">${k.name}</h3>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <h3 class="karta-tytul" style="margin-right: 10px;">${k.name}</h3>
+                            <span style="background-color: #ffc107; color: #000; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; white-space: nowrap;">★ ${k.rating > 0 ? k.rating + '/10' : 'Brak'}</span>
+                        </div>
                         <p class="karta-autor">${tekstAutorow}</p>
                         <p style="font-size: 12px; color: #666; margin-bottom: 10px;">Rok: ${k.bookYear}</p>
                         <button class="btn-akcja btn-maly" onclick="pokazDetale(${k.id})">Szczegóły</button>
@@ -550,7 +553,10 @@ function pobierzKsiazkiAutora(authorId) {
                 ramka.innerHTML = `
                     <img src="/book/${k.id}/cover" class="karta-img" onerror="this.outerHTML='<div class=\\'karta-okladka-zastepcza\\'>Brak okładki</div>'">
                     <div class="karta-info">
-                        <h3 class="karta-tytul">${k.name}</h3>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <h3 class="karta-tytul" style="margin-right: 10px;">${k.name}</h3>
+                            <span style="background-color: #ffc107; color: #000; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; white-space: nowrap;">★ ${k.rating > 0 ? k.rating + '/10' : 'Brak'}</span>
+                        </div>
                         <p class="karta-autor">${tekstAutorow}</p>
                         <p style="font-size: 12px; color: #666; margin-bottom: 10px;">Rok: ${k.bookYear}</p>
                         <button class="btn-akcja btn-maly" onclick="pokazDetale(${k.id})">Szczegóły</button>
@@ -609,7 +615,10 @@ function odswiezRecenzje(ksiazkaId) {
                         </div>
                         <div class="recenzja-tekst">"${r.reviewText}"</div>
                         
-                        <button type="button" class="btn-link" onclick="pokazFormularzOdpowiedzi(${r.id}, this)">Odpowiedz</button>
+                        <div style="margin-top: 10px;">
+                            <button type="button" class="btn-link" onclick="pokazFormularzOdpowiedzi(${r.id}, this)">Odpowiedz</button>
+                            <button type="button" class="btn-link" style="color: #dc3545; margin-left: 15px;" onclick="usunRecenzje(${r.id})">Usuń</button>
+                        </div>
                         
                         <div class="formularz-odpowiedzi" style="display: none; margin-top: 15px; padding-top: 10px; border-top: 1px dashed #eaeaea;">
                             <form onsubmit="wyslijOdpowiedz(event, ${r.id})">
@@ -643,9 +652,29 @@ function odswiezRecenzje(ksiazkaId) {
         });
 }
 
-// pokazywanie pola do wpisania odpowiedzi
+// usuwanie pojedynczej recenzji
+window.usunRecenzje = function(id) {
+    const pytanie = confirm("Czy na pewno chcesz usunąć tę recenzję/odpowiedź?");
+    
+    if (pytanie) {
+        fetch(`/book-review/${id}`, {
+            method: 'DELETE'
+        })
+        .then(res => {
+            if (res.ok) {
+                alert("Recenzja została usunięta.");
+                odswiezRecenzje(sprawdzanaKsiazkaId);
+                pobierzKsiazki(); // odswiezenie by rating na liscie mogl sie zaktualizowac
+            } else {
+                alert("Wystąpił błąd podczas usuwania recenzji.");
+            }
+        })
+        .catch(err => console.log('blad usuwania recenzji', err));
+    }
+};
+
 window.pokazFormularzOdpowiedzi = function(id, przycisk) {
-    const kontener = przycisk.nextElementSibling;
+    const kontener = przycisk.parentElement.nextElementSibling;
     if (kontener.style.display === 'none') {
         kontener.style.display = 'block';
         przycisk.innerText = 'Anuluj';
@@ -655,7 +684,6 @@ window.pokazFormularzOdpowiedzi = function(id, przycisk) {
     }
 };
 
-// zapis zagniezdzonej odpowiedzi do bazy
 window.wyslijOdpowiedz = function(e, parentId) {
     e.preventDefault();
     if(!sprawdzanaKsiazkaId) return;
@@ -687,6 +715,7 @@ window.wyslijOdpowiedz = function(e, parentId) {
     })
     .then(() => {
         odswiezRecenzje(sprawdzanaKsiazkaId);
+        pobierzKsiazki(); // zeby oceny sie zaaktualizowaly
     })
     .catch(err => {
         console.log('blad zapisu odpowiedzi', err);
@@ -694,7 +723,6 @@ window.wyslijOdpowiedz = function(e, parentId) {
     });
 };
 
-// zapis nowej recenzji do bazy
 const formRecenzja = document.getElementById('formularz-recenzji');
 
 formRecenzja.addEventListener('submit', (e) => {
@@ -727,6 +755,7 @@ formRecenzja.addEventListener('submit', (e) => {
     .then(() => {
         formRecenzja.reset();
         odswiezRecenzje(sprawdzanaKsiazkaId);
+        pobierzKsiazki(); // zeby zaktualizowac glowny rating ksiazki po ocenie
     })
     .catch(err => {
         console.log('blad zapisu recenzji', err);
