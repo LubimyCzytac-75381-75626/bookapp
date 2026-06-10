@@ -1,6 +1,52 @@
 # Bookapp - frontend
+## Autorzy Projektu
 
-75381- Oleksandr Mandziuk 
+Projekt został zrealizowany w ramach współpracy zespołowej o jasnym podziale obowiązków:
+
+* **Frontend Development & UI/UX:** Oleksandr Mandziuk (Numer albumu: 75381)
+* **Backend Development (REST API):** Tymofii Salashnik (Numer albumu: 75626) 
+
+# Katalog Książek – Aplikacja Frontendowa
+
+Niniejszy projekt stanowi część kliencką (Frontend) aplikacji internetowej "Katalog Książek". Jest to w pełni interaktywny interfejs typu Single Page Application (SPA), służący do zarządzania biblioteką książek, bazą autorów, kategoriami oraz recenzjami czytelników. 
+
+Warstwa frontendowa została stworzona od podstaw przy użyciu czystych technologii webowych, bez użycia zewnętrznych frameworków komponentowych. Zapewnia to maksymalną wydajność, brak zbędnych zależności oraz pełną kontrolę nad drzewem DOM. Aplikacja w pełni komunikuje się z backendowym serwerem poprzez architekturę REST API.
+
+## Główne Funkcjonalności
+
+Projekt koncentruje się na dostarczeniu intuicyjnego, responsywnego oraz dynamicznego interfejsu użytkownika. W ramach aplikacji zaimplementowano następujące moduły:
+
+### Zarządzanie Książkami
+* **Przegląd katalogu:** Prezentacja wszystkich pozycji w formie dopasowującej się siatki kart zawierającej okładkę, informacje o autorach, rok wydania oraz średnią ocenę.
+* **Tworzenie i modyfikacja:** Dynamiczne formularze umożliwiające dodawanie nowych książek oraz edycję danych już istniejących pozycji.
+* **Przesyłanie plików:** Integracja z obiektem `FormData` pozwalająca na asynchroniczne wgrywanie okładek (JPEG/PNG) za pomocą żądań typu Multipart.
+* **Usuwanie danych:** Bezpieczne usuwanie książek z bazy danych, zabezpieczone systemowym monitem potwierdzającym intencję użytkownika.
+
+### Wyszukiwanie i Filtrowanie
+* **Wyszukiwarka czasu rzeczywistego:** Filtrowanie pozycji po tytule bezpośrednio podczas wpisywania tekstu. Zastosowanie mechanizmu Debounce (opóźnienie 300 ms) skutecznie eliminuje nadmiarowe zapytania do serwera.
+* **Filtr kategorii:** Dynamicznie mapowany element wyboru (`<select>`), pobierający słownik bezpośrednio z bazy danych i umożliwiający natychmiastowe zawężenie wyników. Wyszukiwarka oraz filtr mogą działać jednocześnie.
+
+### Zarządzanie Autorami
+* **Globalny skorowidz autorów:** Osobna sekcja prezentująca wszystkich twórców znajdujących się w bazie. Zbyt długie biografie są automatycznie skracane na poziomie stylów CSS (`line-clamp`), co zapobiega zaburzeniom makiety.
+* **Profil szczegółowy twórcy:** Dedykowany widok zawierający pełny opis biograficzny, fotografię oraz automatycznie generowaną listę książek przypisanych do danego autora.
+* **Okno modalne:** System szybkiego wprowadzania nowych autorów bezpośrednio z poziomu formularza dodawania książki, eliminujący konieczność opuszczania bieżącej sekcji.
+
+### System Recenzji i Komentarzy
+* **Drzewiasta struktura wątków:** Odpowiedzi czytelników wyświetlane są w formie zagnieżdżonej struktury. Logika aplikacji rekurencyjnie oblicza i aplikuje odpowiednie wcięcia horyzontalne zależnie od poziomu dyskusji.
+* **Identyfikacja powiązań:** Czytelna wizualizacja relacji odpowiedzi (np. NazwaUżytkownikaA -> NazwaUżytkownikaB), ułatwiająca śledzenie wielowątkowych dyskusji.
+* **Agregacja ocen:** Automatyczne wyliczanie średniej arytmetycznej na podstawie ocen użytkowników (w skali 1-10) i dynamiczna aktualizacja noty widocznej na głównej karcie książki.
+
+### Optymalizacja UX/UI
+* **Komponent Autocomplete:** Autorski moduł podpowiedzi dla pól wyboru autorów oraz kategorii, inicjujący przeszukiwanie słownika po wprowadzeniu minimum 3 znaków.
+* **Kontrola pól tekstowych:** Blokada horyzontalnego skalowania obszarów typu `<textarea>`, chroniąca układ graficzny przed zniekształceniem przez użytkownika.
+* **Nawigacja SPA:** Przejścia pomiędzy ekranami realizowane natychmiastowo poprzez manipulację właściwościami wyświetlania elementów, bez konieczności przeładowywania dokumentu HTML.
+
+## Stos Technologiczny
+
+* **HTML5** – semantyczna struktura dokumentu.
+* **CSS3** – stylowanie z wykorzystaniem Grid oraz Flexbox, natywne zmienne, pełna responsywność (RWD) bez użycia frameworków typu Bootstrap czy Tailwind.
+* **Vanilla JavaScript (ES6+)** – logika biznesowa aplikacji, asynchroniczna manipulacja strukturą DOM, zarządzanie stanami widoków.
+* **Fetch API** – komunikacja z punktami końcowymi REST API (obsługa metod GET, POST, DELETE).
 
 # Bookapp - backend
 
