@@ -33,11 +33,15 @@ public class BookReviewController {
         return bookReviewRepository.findByBookIdAndParentIsNull(bookId);
     }
     @PostMapping("/save")
-    public BookReview save(@RequestBody BookReview bookReview, @RequestParam Long parentId) {
-        log.info("Saving book review: {}", bookReview);
+    public BookReview save(@RequestBody BookReview bookReview, @RequestParam(required = false) Long parentId) {
+    log.info("Saving book review: {}", bookReview);
 
+
+    if (parentId != null) {
         bookReview.setParent(new BookReview().setId(parentId));
-        return bookReviewRepository.save(bookReview);
+    }
+    
+    return bookReviewRepository.save(bookReview);
     }
 
     @GetMapping("/{id}")
