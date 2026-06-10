@@ -329,6 +329,7 @@ input, textarea, select {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     padding: 40px 20px;
     text-align: center;
     flex-shrink: 0;
@@ -532,4 +533,103 @@ input, textarea, select {
     border-radius: 12px;
     font-size: 12px;
     font-weight: bold;
+}
+
+body.dark-mode {
+    background-color: #121212;
+    color: #e0e0e0;
+}
+
+body.dark-mode .nawigacja {
+    background-color: #1e1e1e;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+}
+
+body.dark-mode .logo {
+    color: #78b833;
+}
+
+body.dark-mode .btn-menu {
+    color: #e0e0e0;
+}
+
+body.dark-mode .btn-menu:hover {
+    background-color: #333;
+}
+
+body.dark-mode .karta-zawartosci,
+body.dark-mode .karta-ksiazki,
+body.dark-mode .modal-tresc,
+body.dark-mode .autocomplete-lista {
+    background-color: #1e1e1e;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    color: #e0e0e0;
+}
+
+body.dark-mode .karta-tytul,
+body.dark-mode .tytul-sekcji {
+    color: #ffffff;
+}
+
+body.dark-mode p,
+body.dark-mode div,
+body.dark-mode span {
+    color: #b0b0b0;
+}
+
+body.dark-mode span[style*="color: #78b833"],
+body.dark-mode .recenzja-ocena {
+    color: #78b833 !important;
+}
+
+body.dark-mode span[style*="color: #e67e22"] {
+    color: #e67e22 !important;
+}
+
+body.dark-mode .okladka-placeholder,
+body.dark-mode .autor-foto-placeholder,
+body.dark-mode .domyslny-awatar {
+    background-color: #2a2a2a;
+    border-color: #444;
+}
+
+body.dark-mode input[type="text"],
+body.dark-mode input[type="number"],
+body.dark-mode textarea,
+body.dark-mode select {
+    background-color: #2a2a2a !important;
+    border: 1px solid #444 !important;
+    color: #e0e0e0 !important;
+}
+
+body.dark-mode input::placeholder,
+body.dark-mode textarea::placeholder {
+    color: #888;
+}
+
+body.dark-mode .autocomplete-item:hover {
+    background-color: #333;
+}
+
+body.dark-mode hr {
+    border-top: 1px solid #444 !important;
+}
+
+body.dark-mode .karta-recenzji {
+    background-color: #2a2a2a;
+    border: 1px solid #444;
+}
+
+body.dark-mode label {
+    color: #e0e0e0 !important;
+}
+
+body.dark-mode #blok-autorow-projektu {
+    background-color: #1e1e1e !important;
+    border-color: #78b833 !important;
+}
+
+body.dark-mode .dodaj-okladke-kolumna {
+    background-color: #252525 !important;
+    border: 1px dashed #444 !important;
 }

@@ -1,4 +1,5 @@
 // elementy dom
+const logoStrony = document.getElementById('logo-strony');
 const btnLista = document.getElementById('btn-lista');
 const btnDodaj = document.getElementById('btn-dodaj');
 const btnAutorzy = document.getElementById('btn-autorzy'); 
@@ -8,7 +9,9 @@ const btnPowrotZDodaj = document.getElementById('btn-powrot-z-dodaj');
 const btnUsunAutora = document.getElementById('btn-usun-autora'); 
 const filtrKategorii = document.getElementById('filtr-kategorii'); 
 const wyszukiwarkaKsiazek = document.getElementById('wyszukiwarka-ksiazek');
+const wyszukiwarkaAutorow = document.getElementById('wyszukiwarka-autorow');
 const btnEdytujKsiazke = document.getElementById('btn-edytuj-ksiazke'); 
+const btnMotyw = document.getElementById('btn-motyw');
 
 const sekcjaLista = document.getElementById('sekcja-lista');
 const sekcjaDodaj = document.getElementById('sekcja-dodaj');
@@ -18,6 +21,29 @@ const sekcjaAutorzyLista = document.getElementById('sekcja-autorzy-lista');
 
 let skadWidokAutora = sekcjaLista;
 let edytowanaKsiazkaId = null; 
+let pelnaListaAutorow = []; // zmienna pomocnicza do wyszukiwarki autorow
+
+// obsluga ciemnego motywu
+if (btnMotyw) {
+    const aktualnyMotyw = localStorage.getItem('motyw');
+    
+    if (aktualnyMotyw === 'ciemny') {
+        document.body.classList.add('dark-mode');
+        btnMotyw.innerText = '☀️';
+    }
+
+    btnMotyw.addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+        
+        if (document.body.classList.contains('dark-mode')) {
+            localStorage.setItem('motyw', 'ciemny');
+            btnMotyw.innerText = '☀️';
+        } else {
+            localStorage.setItem('motyw', 'jasny');
+            btnMotyw.innerText = '🌙';
+        }
+    });
+}
 
 // zarzadzanie sekcjami
 function pokazSekcje(sekcja) {
@@ -29,14 +55,21 @@ function pokazSekcje(sekcja) {
     sekcja.style.display = 'block';
 }
 
+if (logoStrony) {
+    logoStrony.addEventListener('click', () => {
+        pokazSekcje(sekcjaLista);
+        pobierzKsiazki();
+    });
+}
+
 btnLista.addEventListener('click', () => {
     pokazSekcje(sekcjaLista);
     pobierzKsiazki();
 });
 
-// Zdarzenie wyswietlenia sekcji wszystkich autorow
 if (btnAutorzy) {
     btnAutorzy.addEventListener('click', () => {
+        if (wyszukiwarkaAutorow) wyszukiwarkaAutorow.value = '';
         pokazSekcje(sekcjaAutorzyLista);
         pobierzWszystkichAutorow();
     });
@@ -82,7 +115,7 @@ if (filtrKategorii) {
     });
 }
 
-// zdarzenie dla wyszukiwarki
+// zdarzenie dla wyszukiwarki ksiazek
 if (wyszukiwarkaKsiazek) {
     let timeoutWyszukiwarki;
     wyszukiwarkaKsiazek.addEventListener('input', () => {
@@ -90,6 +123,19 @@ if (wyszukiwarkaKsiazek) {
         timeoutWyszukiwarki = setTimeout(() => {
             pobierzKsiazki();
         }, 300);
+    });
+}
+
+// zdarzenie dla wyszukiwarki autorow
+if (wyszukiwarkaAutorow) {
+    wyszukiwarkaAutorow.addEventListener('input', (e) => {
+        const tekst = e.target.value.toLowerCase().trim();
+        if (tekst === '') {
+            renderujListeAutorow(pelnaListaAutorow);
+        } else {
+            const przefiltrowani = pelnaListaAutorow.filter(a => a.name.toLowerCase().includes(tekst));
+            renderujListeAutorow(przefiltrowani);
+        }
     });
 }
 
@@ -330,7 +376,7 @@ function dodajWierszZLista(kontener, dane, klasaDlaId, placeholder, toPierwszy, 
     ustawZdarzeniaDlaWiersza(poleTekstowe, ukryteId, divZLista, dane);
 }
 
-function parseIntoZdarzeniaDlaWiersza(pole, ukryteId, lista, dane) {
+function ustawZdarzeniaDlaWiersza(pole, ukryteId, lista, dane) {
     pole.addEventListener('focus', () => {
         if (pole.value.length === 0) {
             budujPozycjeListy(lista, dane, pole, ukryteId);
@@ -514,7 +560,6 @@ function pobierzKsiazki() {
         });
 }
 
-// pobieranie i wyswietlanie listy wszystkich autorow z bazy
 function pobierzWszystkichAutorow() {
     const obszar = document.getElementById('lista-autorow-kontener');
     if (!obszar) return;
@@ -524,35 +569,43 @@ function pobierzWszystkichAutorow() {
     fetch('/author/')
         .then(res => res.json())
         .then(dane => {
+            pelnaListaAutorow = dane; 
             pamiecAutorow = dane; 
-            obszar.innerHTML = '';
-
-            if (dane.length === 0) {
-                obszar.innerHTML = '<p class="pusty-stan">Brak autorów w bazie.</p>';
-                return;
-            }
-
-            dane.forEach(a => {
-                const ramka = document.createElement('div');
-                ramka.className = 'karta-ksiazki'; 
-
-                const bioTekst = a.biography ? a.biography : "Brak biografii.";
-
-                ramka.innerHTML = `
-                    <img src="/author/${a.id}/photo" class="karta-img" style="object-fit: cover;" onerror="this.outerHTML='<div class=\\'karta-okladka-zastepcza\\' style=\\'display:flex;align-items:center;justify-content:center;background:#eaeaea;color:#888;\\'><svg viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'currentColor\\' stroke-width=\\'2\\' stroke-linecap=\\'round\\' stroke-linejoin=\\'round\\' style=\\'width:40px;height:40px;\\'><circle cx=\\'12\\' cy=\\'8\\' r=\\'5\\'></circle><path d=\\'M20 21a8 8 0 0 0-16 0\\'></path></svg></div>'">
-                    <div class="karta-info">
-                        <h3 class="karta-tytul">${a.name}</h3>
-                        <p style="font-size: 13px; color: #555; margin-top: 5px; margin-bottom: 15px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; line-height: 1.4; height: 4.2em;">${bioTekst}</p>
-                        <button class="btn-akcja btn-maly" onclick="skadWidokAutora = sekcjaAutorzyLista; pokazDetaleAutora(${a.id})">Szczegóły</button>
-                    </div>
-                `;
-                obszar.appendChild(ramka);
-            });
+            renderujListeAutorow(dane);
         })
         .catch(err => {
             console.log('blad pobierania autorow', err);
             obszar.innerHTML = '<p class="pusty-stan">Błąd połączenia z serwerem.</p>';
         });
+}
+
+function renderujListeAutorow(dane) {
+    const obszar = document.getElementById('lista-autorow-kontener');
+    if (!obszar) return;
+    
+    obszar.innerHTML = '';
+
+    if (dane.length === 0) {
+        obszar.innerHTML = '<p class="pusty-stan">Brak autorów spełniających kryteria.</p>';
+        return;
+    }
+
+    dane.forEach(a => {
+        const ramka = document.createElement('div');
+        ramka.className = 'karta-ksiazki'; 
+
+        const bioTekst = a.biography ? a.biography : "Brak biografii.";
+
+        ramka.innerHTML = `
+            <img src="/author/${a.id}/photo" class="karta-img" style="object-fit: cover;" onerror="this.outerHTML='<div class=\\'karta-okladka-zastepcza\\' style=\\'display:flex;align-items:center;justify-content:center;background:#eaeaea;color:#888;\\'><svg viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'currentColor\\' stroke-width=\\'2\\' stroke-linecap=\\'round\\' stroke-linejoin=\\'round\\' style=\\'width:40px;height:40px;\\'><circle cx=\\'12\\' cy=\\'8\\' r=\\'5\\'></circle><path d=\\'M20 21a8 8 0 0 0-16 0\\'></path></svg></div>'">
+            <div class="karta-info">
+                <h3 class="karta-tytul">${a.name}</h3>
+                <p style="font-size: 13px; color: #555; margin-top: 5px; margin-bottom: 15px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; line-height: 1.4; height: 4.2em;">${bioTekst}</p>
+                <button class="btn-akcja btn-maly" onclick="skadWidokAutora = sekcjaAutorzyLista; pokazDetaleAutora(${a.id})">Szczegóły</button>
+            </div>
+        `;
+        obszar.appendChild(ramka);
+    });
 }
 
 // zapis ksiazki
@@ -886,9 +939,9 @@ function odswiezRecenzje(ksiazkaId) {
 
 // usuwanie pojedynczej recenzji
 window.usunRecenzje = function(id) {
-    const pyatnie = confirm("Czy na pewno chcesz usunąć tę recenzję/odpowiedź?");
+    const pytanie = confirm("Czy na pewno chcesz usunąć tę recenzję/odpowiedź?");
     
-    if (pyatnie) {
+    if (pytanie) {
         fetch(`/book-review/${id}`, {
             method: 'DELETE'
         })
@@ -1023,30 +1076,3 @@ if (przyciskUsun) {
         }
     });
 }
-
-// autocomplete logiki (wiersze dynamiczne)
-function ustawZdarzeniaDlaWiersza(pole, ukryteId, lista, dane) {
-    pole.addEventListener('focus', () => {
-        if (pole.value.length === 0) {
-            budujPozycjeListy(lista, dane, pole, ukryteId);
-            lista.style.display = 'block';
-        } else {
-            uruchomFiltrowanie(pole, ukryteId, lista, dane);
-            lista.style.display = 'block';
-        }
-    });
-
-    pole.addEventListener('input', () => {
-        uruchomFiltrowanie(pole, ukryteId, lista, dane);
-    });
-
-    document.addEventListener('click', (e) => {
-        if (e.target !== pole && e.target !== lista) {
-            lista.style.display = 'none';
-        }
-    });
-}
-
-// zaladowanie na starcie
-pobierzDaneSlownikowe();
-pobierzKsiazki();
