@@ -543,7 +543,7 @@ function pobierzKsiazki() {
                     <div class="karta-info">
                         <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                             <h3 class="karta-tytul" style="margin-right: 10px;">${k.name}</h3>
-                            <span style="background-color: #ffc107; color: #000; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; white-space: nowrap;">★ ${k.rating > 0 ? k.rating + '/10' : 'Brak'}</span>
+                            <span id="ocena-karta-${k.id}" style="background-color: #ffc107; color: #000; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; white-space: nowrap;">★ ...</span>
                         </div>
                         <p class="karta-autor" style="margin-bottom: 5px;">${tekstAutorow}</p>
                         <p style="font-size: 11px; color: #6a7482; margin-bottom: 5px; font-weight: 500;">Kategoria: ${tekstKategoriiKarta}</p>
@@ -552,6 +552,40 @@ function pobierzKsiazki() {
                     </div>
                 `;
                 obszar.appendChild(ramka);
+
+                fetch(`/book-review/?bookId=${k.id}`)
+                    .then(res => res.json())
+                    .then(recenzje => {
+                        let sumaOcen = 0;
+                        let liczbaOcen = 0;
+
+                        function liczOceny(lista) {
+                            lista.forEach(r => {
+                                if (r.grade > 0) {
+                                    sumaOcen += r.grade;
+                                    liczbaOcen++;
+                                }
+                                if (r.children && r.children.length > 0) {
+                                    liczOceny(r.children);
+                                }
+                            });
+                        }
+
+                        liczOceny(recenzje);
+
+                        const spanOceny = document.getElementById(`ocena-karta-${k.id}`);
+                        if (spanOceny) {
+                            if (liczbaOcen > 0) {
+                                spanOceny.innerText = `★ ${(sumaOcen / liczbaOcen).toFixed(1)}/10`;
+                            } else {
+                                spanOceny.innerText = '★ Brak';
+                            }
+                        }
+                    })
+                    .catch(() => {
+                        const spanOceny = document.getElementById(`ocena-karta-${k.id}`);
+                        if (spanOceny) spanOceny.innerText = '★ Brak';
+                    });
             });
         })
         .catch(err => {
@@ -832,7 +866,7 @@ function pobierzKsiazkiAutora(authorId) {
                     <div class="karta-info">
                         <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                             <h3 class="karta-tytul" style="margin-right: 10px;">${k.name}</h3>
-                            <span style="background-color: #ffc107; color: #000; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; white-space: nowrap;">★ ${k.rating > 0 ? k.rating + '/10' : 'Brak'}</span>
+                            <span id="ocena-karta-autora-${k.id}" style="background-color: #ffc107; color: #000; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; white-space: nowrap;">★ ...</span>
                         </div>
                         <p class="karta-autor" style="margin-bottom: 5px;">${tekstAutorow}</p>
                         <p style="font-size: 11px; color: #6a7482; margin-bottom: 5px; font-weight: 500;">Kategoria: ${tekstKategoriiKarta}</p>
@@ -841,6 +875,40 @@ function pobierzKsiazkiAutora(authorId) {
                     </div>
                 `;
                 obszar.appendChild(ramka);
+
+                fetch(`/book-review/?bookId=${k.id}`)
+                    .then(res => res.json())
+                    .then(recenzje => {
+                        let sumaOcen = 0;
+                        let liczbaOcen = 0;
+
+                        function liczOceny(lista) {
+                            lista.forEach(r => {
+                                if (r.grade > 0) {
+                                    sumaOcen += r.grade;
+                                    liczbaOcen++;
+                                }
+                                if (r.children && r.children.length > 0) {
+                                    liczOceny(r.children);
+                                }
+                            });
+                        }
+
+                        liczOceny(recenzje);
+
+                        const spanOceny = document.getElementById(`ocena-karta-autora-${k.id}`);
+                        if (spanOceny) {
+                            if (liczbaOcen > 0) {
+                                spanOceny.innerText = `★ ${(sumaOcen / liczbaOcen).toFixed(1)}/10`;
+                            } else {
+                                spanOceny.innerText = '★ Brak';
+                            }
+                        }
+                    })
+                    .catch(() => {
+                        const spanOceny = document.getElementById(`ocena-karta-autora-${k.id}`);
+                        if (spanOceny) spanOceny.innerText = '★ Brak';
+                    });
             });
         })
         .catch(err => {
@@ -1005,7 +1073,7 @@ window.wyslijOdpowiedz = function(e, parentId) {
     })
     .catch(err => {
         console.log('blad zapisu odpowiedzi', err);
-        alert("Błąd podczas dodawania odpowiedzi. Sprawdź konsolę.");
+        alert("Błąd podczas додавання відповіді. Перевірте консоль.");
     });
 };
 
@@ -1046,7 +1114,7 @@ if (formRecenzja) {
         })
         .catch(err => {
             console.log('blad zapisu recenzji', err);
-            alert("Nie udało się dodać recenzji. Sprawdź konsolę.");
+            alert("Не вдалося додати відгук. Перевірте консоль.");
         });
     });
 }
