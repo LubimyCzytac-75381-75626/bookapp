@@ -5,9 +5,8 @@ Projekt został zrealizowany w ramach współpracy zespołowej o jasnym podziale
 * **Frontend Development & UI/UX:** Oleksandr Mandziuk (Numer albumu: 75381)
 * **Backend Development (REST API):** Tymofii Salashnik (Numer albumu: 75626)
 
-# Bookapp - frontend
-
 # Katalog Książek – Aplikacja Frontendowa
+75381 - Oleksandr Mandziuk
 
 Niniejszy projekt stanowi część kliencką (Frontend) aplikacji internetowej "Katalog Książek". Jest to w pełni interaktywny interfejs typu Single Page Application (SPA), służący do zarządzania biblioteką książek, bazą autorów, kategoriami oraz recenzjami czytelników. 
 
