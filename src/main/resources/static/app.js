@@ -1076,3 +1076,6 @@ if (przyciskUsun) {
         }
     });
 }
+pokazSekcje(sekcjaLista);
+pobierzDaneSlownikowe();
+pobierzKsiazki();
