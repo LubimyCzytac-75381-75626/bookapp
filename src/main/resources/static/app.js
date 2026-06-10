@@ -529,30 +529,112 @@ function odswiezRecenzje(ksiazkaId) {
                 return;
             }
 
-            let suma = 0;
+            let sumaOcen = 0;
+            let liczbaOcen = 0;
 
-            dane.forEach(r => {
-                suma += r.grade;
-                const klocek = document.createElement('div');
-                klocek.className = 'karta-recenzji';
-                klocek.innerHTML = `
-                    <div class="recenzja-naglowek">
-                        <span class="recenzja-autor">${r.userName}</span>
-                        <span class="recenzja-ocena">${r.grade}/10</span>
-                    </div>
-                    <div class="recenzja-tekst">"${r.reviewText}"</div>
-                `;
-                obszarRecenzji.appendChild(klocek);
-            });
+            function renderujDrzewo(lista, kontener, poziom = 0) {
+                lista.forEach(r => {
+                    if (poziom === 0 && r.grade > 0) {
+                        sumaOcen += r.grade;
+                        liczbaOcen++;
+                    }
 
-            const wyliczonaSrednia = (suma / dane.length).toFixed(1);
-            document.getElementById('detale-ocena').innerText = `${wyliczonaSrednia}/10`;
+                    const klocek = document.createElement('div');
+                    klocek.className = 'karta-recenzji';
+                    
+                    if (poziom > 0) {
+                        klocek.classList.add('karta-recenzji-wciecie');
+                    }
+
+                    const znaczekOceny = r.grade > 0 
+                        ? `<span class="recenzja-ocena">${r.grade}/10</span>` 
+                        : `<span class="recenzja-ocena-odpowiedz">Odpowiedź</span>`;
+
+                    klocek.innerHTML = `
+                        <div class="recenzja-naglowek">
+                            <span class="recenzja-autor">${r.userName}</span>
+                            ${znaczekOceny}
+                        </div>
+                        <div class="recenzja-tekst">"${r.reviewText}"</div>
+                        
+                        <button type="button" class="btn-link" onclick="pokazFormularzOdpowiedzi(${r.id}, this)">Odpowiedz</button>
+                        
+                        <div class="formularz-odpowiedzi" style="display: none; margin-top: 15px; padding-top: 10px; border-top: 1px dashed #eaeaea;">
+                            <form onsubmit="wyslijOdpowiedz(event, ${r.id})">
+                                <input type="text" class="odp-autor" placeholder="Twoje imię / nick" required style="width: 100%; margin-bottom: 10px; padding: 8px; border: 1px solid #ddd;">
+                                <textarea class="odp-tekst" rows="2" placeholder="Napisz odpowiedź..." required style="width: 100%; margin-bottom: 10px; padding: 8px; border: 1px solid #ddd;"></textarea>
+                                <button type="submit" class="btn-akcja btn-maly" style="width: auto;">Wyślij odpowiedź</button>
+                            </form>
+                        </div>
+                    `;
+                    
+                    kontener.appendChild(klocek);
+
+                    if (r.children && r.children.length > 0) {
+                        renderujDrzewo(r.children, kontener, poziom + 1);
+                    }
+                });
+            }
+
+            renderujDrzewo(dane, obszarRecenzji);
+
+            if (liczbaOcen > 0) {
+                const wyliczonaSrednia = (sumaOcen / liczbaOcen).toFixed(1);
+                document.getElementById('detale-ocena').innerText = `${wyliczonaSrednia}/10`;
+            } else {
+                document.getElementById('detale-ocena').innerText = "Brak ocen";
+            }
         })
         .catch(err => {
             console.log('blad ladowania recenzji', err);
             obszarRecenzji.innerHTML = '<p class="pusty-stan">Błąd ładowania recenzji.</p>';
         });
 }
+
+window.pokazFormularzOdpowiedzi = function(id, przycisk) {
+    const kontener = przycisk.nextElementSibling;
+    if (kontener.style.display === 'none') {
+        kontener.style.display = 'block';
+        przycisk.innerText = 'Anuluj';
+    } else {
+        kontener.style.display = 'none';
+        przycisk.innerText = 'Odpowiedz';
+    }
+};
+
+window.wyslijOdpowiedz = function(e, parentId) {
+    e.preventDefault();
+    if(!sprawdzanaKsiazkaId) return;
+
+    const formularz = e.target;
+    
+    const odpowiedzDane = {
+        book: { id: sprawdzanaKsiazkaId },
+        userName: formularz.querySelector('.odp-autor').value.trim(),
+        grade: 0,
+        reviewText: formularz.querySelector('.odp-tekst').value.trim(),
+        children: []
+    };
+
+    fetch(`/book-review/save?parentId=${parentId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(odpowiedzDane)
+    })
+    .then(res => {
+        if (!res.ok) throw new Error("Błąd zapisu odpowiedzi");
+        return res.json();
+    })
+    .then(() => {
+        odswiezRecenzje(sprawdzanaKsiazkaId);
+    })
+    .catch(err => {
+        console.log('blad zapisu odpowiedzi', err);
+        alert("Wystąpił błąd podczas dodawania odpowiedzi.");
+    });
+};
 
 const formRecenzja = document.getElementById('formularz-recenzji');
 
@@ -564,7 +646,8 @@ formRecenzja.addEventListener('submit', (e) => {
         book: { id: sprawdzanaKsiazkaId },
         userName: document.getElementById('recenzja-autor').value.trim(),
         grade: parseInt(document.getElementById('recenzja-ocena').value),
-        reviewText: document.getElementById('recenzja-tekst').value.trim()
+        reviewText: document.getElementById('recenzja-tekst').value.trim(),
+        children: []
     };
 
     fetch('/book-review/save', {
@@ -574,12 +657,18 @@ formRecenzja.addEventListener('submit', (e) => {
         },
         body: JSON.stringify(recenzjaDane)
     })
-    .then(res => res.json())
+    .then(res => {
+        if (!res.ok) throw new Error("Błąd podczas zapisywania recenzji.");
+        return res.json();
+    })
     .then(() => {
         formRecenzja.reset();
         odswiezRecenzje(sprawdzanaKsiazkaId);
     })
-    .catch(err => console.log('blad zapisu recenzji', err));
+    .catch(err => {
+        console.log('blad zapisu recenzji', err);
+        alert("Nie udało się dodać recenzji. Sprawdź serwer.");
+    });
 });
 
 const przyciskUsun = document.getElementById('btn-usun-ksiazke');
