@@ -1,4 +1,4 @@
-## Autorzy Projektu
+# Autorzy Projektu
 
 Projekt został zrealizowany w ramach współpracy zespołowej o jasnym podziale obowiązków:
 
