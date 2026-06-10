@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -13,6 +15,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -73,4 +76,8 @@ public class Book {
     @NotEmpty(message = "Book must have at least one category")
     List<Category> categories = new ArrayList<>();
 
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL)
+    @JsonIgnoreProperties("book")
+    @Builder.Default
+    List<BookReview> bookReviews = new ArrayList<>();
 }
