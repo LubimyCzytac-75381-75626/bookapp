@@ -48,6 +48,9 @@ public class Book {
     @NotNull(message = "Book year cannot be empty")
     Integer bookYear;
 
+    @Column(name = "description")
+    String description;
+
     @Column(name = "cover")
     @JsonIgnore
     byte[] cover; 

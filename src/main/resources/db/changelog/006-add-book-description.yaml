@@ -1,0 +1,12 @@
+databaseChangeLog:
+- changeSet:
+    id: add-book-description
+    author: tymofii.salashnik
+    changes:
+    - addColumn:
+        tableName: book
+        columns:
+        - column:
+            name: description
+            type: text
+            remarks: Description of the book
