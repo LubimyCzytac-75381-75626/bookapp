@@ -21,12 +21,25 @@
     <main class="kontener" id="glowny-kontener">
 
         <section id="sekcja-lista" class="karta-zawartosci">
-            <h2 class="tytul-sekcji">Wszystkie Książki</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+                <h2 class="tytul-sekcji" style="margin-bottom: 0;">Wszystkie Książki</h2>
+                <div style="display: flex; align-items: center;">
+                    <label for="filtr-kategorii" style="font-weight: bold; margin-right: 10px; color: #4c6280;">Filtruj kategorię:</label>
+                    <select id="filtr-kategorii" style="padding: 8px 12px; border-radius: 4px; border: 1px solid #ddd; outline: none; cursor: pointer; background-color: #fff; min-width: 180px;">
+                        <option value="">Wszystkie</option>
+                    </select>
+                </div>
+            </div>
             <div id="lista-ksiazek-kontener" class="siatka-ksiazek">
             </div>
         </section>
 
         <section id="sekcja-dodaj" class="karta-zawartosci" style="display: none;">
+            <!-- Przycisk powrotu na górze sekcji dodawania -->
+            <div style="margin-bottom: 20px;">
+                <button id="btn-powrot-z-dodaj" class="btn-menu">&larr; Powrót do listy</button>
+            </div>
+
             <div class="dodaj-ksiazke-uklad">
                 <div class="dodaj-okladke-kolumna">
                     <input type="file" id="plik-okladka" accept="image/jpeg, image/png" style="display: none;">
@@ -75,6 +88,7 @@
         </section>
 
         <section id="sekcja-szczegoly" class="karta-zawartosci" style="display: none;">
+            <!-- Przycisk powrotu w detalach ksiazki -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <button id="btn-powrot" class="btn-menu">&larr; Powrót do listy</button>
                 <button id="btn-usun-ksiazke" class="btn-akcja" style="background-color: #d9534f;">Usuń książkę</button>
@@ -123,8 +137,10 @@
         </section>
 
         <section id="sekcja-autor-szczegoly" class="karta-zawartosci" style="display: none;">
+            <!-- Przycisk powrotu w detalach autora -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <button id="btn-powrot-z-autora" class="btn-menu">&larr; Powrót</button>
+                <button id="btn-powrot-z-autora" class="btn-menu">&larr; Powrót do listy</button>
+                <button id="btn-usun-autora" class="btn-akcja" style="background-color: #d9534f;">Usuń autora</button>
             </div>
             
             <div class="szczegoly-kontener">

@@ -3,6 +3,9 @@ const btnLista = document.getElementById('btn-lista');
 const btnDodaj = document.getElementById('btn-dodaj');
 const btnPowrot = document.getElementById('btn-powrot');
 const btnPowrotZAutora = document.getElementById('btn-powrot-z-autora');
+const btnPowrotZDodaj = document.getElementById('btn-powrot-z-dodaj'); 
+const btnUsunAutora = document.getElementById('btn-usun-autora'); 
+const filtrKategorii = document.getElementById('filtr-kategorii'); // Nowy element: dropdown filtra
 
 const sekcjaLista = document.getElementById('sekcja-lista');
 const sekcjaDodaj = document.getElementById('sekcja-dodaj');
@@ -37,6 +40,25 @@ btnPowrot.addEventListener('click', () => {
 if (btnPowrotZAutora) {
     btnPowrotZAutora.addEventListener('click', () => {
         pokazSekcje(skadWidokAutora);
+    });
+}
+
+if (btnPowrotZDodaj) {
+    btnPowrotZDodaj.addEventListener('click', () => {
+        pokazSekcje(sekcjaLista);
+    });
+}
+
+if (btnUsunAutora) {
+    btnUsunAutora.addEventListener('click', () => {
+        window.usunAutora();
+    });
+}
+
+// zdarzenie dla filtra kategorii
+if (filtrKategorii) {
+    filtrKategorii.addEventListener('change', () => {
+        pobierzKsiazki();
     });
 }
 
@@ -149,8 +171,22 @@ function pobierzDaneSlownikowe() {
         .then(res => res.json())
         .then(dane => {
             pamiecKategorii = dane;
+            wypelnijFiltrKategorii(); // uzupelnienie drowdowna z kategoriami
         })
         .catch(err => console.log('blad pobierania kategorii', err));
+}
+
+// wypelnianie elementu select w HTML danymi z API
+function wypelnijFiltrKategorii() {
+    if (!filtrKategorii) return;
+    filtrKategorii.innerHTML = '<option value="">Wszystkie</option>';
+    
+    pamiecKategorii.forEach(kat => {
+        const opt = document.createElement('option');
+        opt.value = kat.id;
+        opt.innerText = kat.name;
+        filtrKategorii.appendChild(opt);
+    });
 }
 
 // autocomplete logiki
@@ -326,12 +362,19 @@ formularzAutora.addEventListener('submit', (e) => {
 // logika ksiazek i szczegolow
 let listaPobranychKsiazek = [];
 let sprawdzanaKsiazkaId = null;
+let sprawdzanyAutorId = null;
 
 function pobierzKsiazki() {
     const obszar = document.getElementById('lista-ksiazek-kontener');
     obszar.innerHTML = '<p class="pusty-stan">Ładowanie...</p>';
 
-    fetch('/book/')
+    // ZMIANA: dynamiczne budowanie url w zaleznosci od wybranego filtra kategorii
+    let url = '/book/';
+    if (filtrKategorii && filtrKategorii.value !== '') {
+        url = `/book/?categoryId=${filtrKategorii.value}`;
+    }
+
+    fetch(url)
         .then(res => res.json())
         .then(dane => {
             listaPobranychKsiazek = dane;
@@ -492,6 +535,8 @@ window.pokazDetale = function(id) {
 
 // pobieranie detali pojedynczego autora
 window.pokazDetaleAutora = function(id) {
+    sprawdzanyAutorId = id;
+
     fetch(`/author/${id}`)
         .then(res => res.json())
         .then(autor => {
@@ -514,11 +559,34 @@ window.pokazDetaleAutora = function(id) {
 
             pokazSekcje(sekcjaAutorSzczegoly);
             
-            // pobranie i wyswietlenie ksiazek tego autora
             pobierzKsiazkiAutora(id);
         })
         .catch(err => console.log('blad pobierania danych autora', err));
 }
+
+// funkcja usuwania autora (powiązana ze statycznym HTML)
+window.usunAutora = function() {
+    if (!sprawdzanyAutorId) return;
+
+    const pytanie = confirm("Czy na pewno chcesz usunąć tego autora? Książki z nim powiązane mogą zostać zmodyfikowane.");
+    
+    if (pytanie) {
+        fetch(`/author/${sprawdzanyAutorId}`, {
+            method: 'DELETE'
+        })
+        .then(res => {
+            if (res.ok) {
+                alert("Autor został usunięty z bazy.");
+                pokazSekcje(sekcjaLista);
+                pobierzKsiazki();
+                pobierzDaneSlownikowe();
+            } else {
+                alert("Wystąpił błąd podczas usuwania. Możliwe, że serwer blokuje usunięcie z powodu przypisanych książek.");
+            }
+        })
+        .catch(err => console.log('blad usuwania autora', err));
+    }
+};
 
 // wyswietlanie listy ksiazek autora
 function pobierzKsiazkiAutora(authorId) {
