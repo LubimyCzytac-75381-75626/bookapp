@@ -13,6 +13,8 @@
             <h1 class="logo">Katalog Książek</h1>
             <div class="menu">
                 <button id="btn-lista" class="btn-menu">Wszystkie książki</button>
+                <!-- Додано кнопку для перегляду всіх авторів -->
+                <button id="btn-autorzy" class="btn-menu">Wszyscy autorzy</button>
                 <button id="btn-dodaj" class="btn-akcja">Dodaj Książkę</button>
             </div>
         </div>
@@ -21,6 +23,15 @@
     <main class="kontener" id="glowny-kontener">
 
         <section id="sekcja-lista" class="karta-zawartosci">
+            <!-- Блок авторів проекту -->
+            <div style="margin-bottom: 25px; padding: 15px; background-color: #f8f9fa; border-radius: 6px; border-left: 4px solid #78b833;">
+                <h3 style="margin-top: 0; margin-bottom: 10px; font-size: 15px; color: #4c6280;">Autorzy projektu:</h3>
+                <div style="display: flex; gap: 30px; font-size: 14px; color: #555; flex-wrap: wrap;">
+                    <div><strong>Frontend:</strong> Oleksandr Mandziuk / 75381</div>
+                    <div><strong>Backend:</strong> Tymofii Salashnik / 75626</div>
+                </div>
+            </div>
+
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
                 <h2 class="tytul-sekcji" style="margin-bottom: 0;">Wszystkie Książki</h2>
                 
@@ -39,6 +50,13 @@
                 </div>
             </div>
             <div id="lista-ksiazek-kontener" class="siatka-ksiazek">
+            </div>
+        </section>
+
+        <!-- Нова секція для відображення списку всіх авторів -->
+        <section id="sekcja-autorzy-lista" class="karta-zawartosci" style="display: none;">
+            <h2 class="tytul-sekcji" style="margin-bottom: 20px;">Wszyscy Autorzy</h2>
+            <div id="lista-autorow-kontener" class="siatka-ksiazek">
             </div>
         </section>
 
@@ -98,7 +116,6 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <button id="btn-powrot" class="btn-menu">&larr; Powrót do listy</button>
                 <div>
-                    <!-- ZMIANA: Przycisk Edytuj -->
                     <button id="btn-edytuj-ksiazke" class="btn-akcja" style="background-color: #f39c12; margin-right: 10px;">Edytuj</button>
                     <button id="btn-usun-ksiazke" class="btn-akcja" style="background-color: #d9534f;">Usuń</button>
                 </div>

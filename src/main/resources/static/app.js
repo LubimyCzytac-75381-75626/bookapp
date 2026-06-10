@@ -1,6 +1,7 @@
 // elementy dom
 const btnLista = document.getElementById('btn-lista');
 const btnDodaj = document.getElementById('btn-dodaj');
+const btnAutorzy = document.getElementById('btn-autorzy'); 
 const btnPowrot = document.getElementById('btn-powrot');
 const btnPowrotZAutora = document.getElementById('btn-powrot-z-autora');
 const btnPowrotZDodaj = document.getElementById('btn-powrot-z-dodaj'); 
@@ -13,6 +14,7 @@ const sekcjaLista = document.getElementById('sekcja-lista');
 const sekcjaDodaj = document.getElementById('sekcja-dodaj');
 const sekcjaSzczegoly = document.getElementById('sekcja-szczegoly');
 const sekcjaAutorSzczegoly = document.getElementById('sekcja-autor-szczegoly');
+const sekcjaAutorzyLista = document.getElementById('sekcja-autorzy-lista'); 
 
 let skadWidokAutora = sekcjaLista;
 let edytowanaKsiazkaId = null; 
@@ -23,6 +25,7 @@ function pokazSekcje(sekcja) {
     sekcjaDodaj.style.display = 'none';
     sekcjaSzczegoly.style.display = 'none';
     if (sekcjaAutorSzczegoly) sekcjaAutorSzczegoly.style.display = 'none';
+    if (sekcjaAutorzyLista) sekcjaAutorzyLista.style.display = 'none';
     sekcja.style.display = 'block';
 }
 
@@ -30,6 +33,14 @@ btnLista.addEventListener('click', () => {
     pokazSekcje(sekcjaLista);
     pobierzKsiazki();
 });
+
+// Zdarzenie wyswietlenia sekcji wszystkich autorow
+if (btnAutorzy) {
+    btnAutorzy.addEventListener('click', () => {
+        pokazSekcje(sekcjaAutorzyLista);
+        pobierzWszystkichAutorow();
+    });
+}
 
 btnDodaj.addEventListener('click', () => {
     edytowanaKsiazkaId = null;
@@ -232,7 +243,7 @@ function pobierzDaneSlownikowe() {
         })
         .catch(err => console.log('blad pobierania autorow', err));
 
-    fetch('/category/') // <-- ZWRÓCONO ORYGINALNY PUNKT KOŃCOWY
+    fetch('/category/') 
         .then(res => res.json())
         .then(dane => {
             pamiecKategorii = dane;
@@ -319,7 +330,7 @@ function dodajWierszZLista(kontener, dane, klasaDlaId, placeholder, toPierwszy, 
     ustawZdarzeniaDlaWiersza(poleTekstowe, ukryteId, divZLista, dane);
 }
 
-function ustawZdarzeniaDlaWiersza(pole, ukryteId, lista, dane) {
+function parseIntoZdarzeniaDlaWiersza(pole, ukryteId, lista, dane) {
     pole.addEventListener('focus', () => {
         if (pole.value.length === 0) {
             budujPozycjeListy(lista, dane, pole, ukryteId);
@@ -499,6 +510,47 @@ function pobierzKsiazki() {
         })
         .catch(err => {
             console.log('blad pobierania ksiazek', err);
+            obszar.innerHTML = '<p class="pusty-stan">Błąd połączenia z serwerem.</p>';
+        });
+}
+
+// pobieranie i wyswietlanie listy wszystkich autorow z bazy
+function pobierzWszystkichAutorow() {
+    const obszar = document.getElementById('lista-autorow-kontener');
+    if (!obszar) return;
+
+    obszar.innerHTML = '<p class="pusty-stan">Ładowanie autorów...</p>';
+
+    fetch('/author/')
+        .then(res => res.json())
+        .then(dane => {
+            pamiecAutorow = dane; 
+            obszar.innerHTML = '';
+
+            if (dane.length === 0) {
+                obszar.innerHTML = '<p class="pusty-stan">Brak autorów w bazie.</p>';
+                return;
+            }
+
+            dane.forEach(a => {
+                const ramka = document.createElement('div');
+                ramka.className = 'karta-ksiazki'; 
+
+                const bioTekst = a.biography ? a.biography : "Brak biografii.";
+
+                ramka.innerHTML = `
+                    <img src="/author/${a.id}/photo" class="karta-img" style="object-fit: cover;" onerror="this.outerHTML='<div class=\\'karta-okladka-zastepcza\\' style=\\'display:flex;align-items:center;justify-content:center;background:#eaeaea;color:#888;\\'><svg viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'currentColor\\' stroke-width=\\'2\\' stroke-linecap=\\'round\\' stroke-linejoin=\\'round\\' style=\\'width:40px;height:40px;\\'><circle cx=\\'12\\' cy=\\'8\\' r=\\'5\\'></circle><path d=\\'M20 21a8 8 0 0 0-16 0\\'></path></svg></div>'">
+                    <div class="karta-info">
+                        <h3 class="karta-tytul">${a.name}</h3>
+                        <p style="font-size: 13px; color: #555; margin-top: 5px; margin-bottom: 15px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; line-height: 1.4; height: 4.2em;">${bioTekst}</p>
+                        <button class="btn-akcja btn-maly" onclick="skadWidokAutora = sekcjaAutorzyLista; pokazDetaleAutora(${a.id})">Szczegóły</button>
+                    </div>
+                `;
+                obszar.appendChild(ramka);
+            });
+        })
+        .catch(err => {
+            console.log('blad pobierania autorow', err);
             obszar.innerHTML = '<p class="pusty-stan">Błąd połączenia z serwerem.</p>';
         });
 }
@@ -834,9 +886,9 @@ function odswiezRecenzje(ksiazkaId) {
 
 // usuwanie pojedynczej recenzji
 window.usunRecenzje = function(id) {
-    const pytanie = confirm("Czy na pewno chcesz usunąć tę recenzję/odpowiedź?");
+    const pyatnie = confirm("Czy na pewno chcesz usunąć tę recenzję/odpowiedź?");
     
-    if (pytanie) {
+    if (pyatnie) {
         fetch(`/book-review/${id}`, {
             method: 'DELETE'
         })
@@ -919,7 +971,6 @@ if (formRecenzja) {
             children: [] 
         };
 
-        // ZWRÓCONO: ?parentId= do poprawnego działania endpointu u Tymofieja
         fetch('/book-review/save?parentId=', {
             method: 'POST',
             headers: {
@@ -969,6 +1020,29 @@ if (przyciskUsun) {
                 }
             })
             .catch(err => console.log('blad usuwania', err));
+        }
+    });
+}
+
+// autocomplete logiki (wiersze dynamiczne)
+function ustawZdarzeniaDlaWiersza(pole, ukryteId, lista, dane) {
+    pole.addEventListener('focus', () => {
+        if (pole.value.length === 0) {
+            budujPozycjeListy(lista, dane, pole, ukryteId);
+            lista.style.display = 'block';
+        } else {
+            uruchomFiltrowanie(pole, ukryteId, lista, dane);
+            lista.style.display = 'block';
+        }
+    });
+
+    pole.addEventListener('input', () => {
+        uruchomFiltrowanie(pole, ukryteId, lista, dane);
+    });
+
+    document.addEventListener('click', (e) => {
+        if (e.target !== pole && e.target !== lista) {
+            lista.style.display = 'none';
         }
     });
 }
