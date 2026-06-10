@@ -145,7 +145,7 @@ function pobierzDaneSlownikowe() {
         })
         .catch(err => console.log('blad pobierania autorow', err));
 
-    fetch('/categories/')
+    fetch('/category/')
         .then(res => res.json())
         .then(dane => {
             pamiecKategorii = dane;
