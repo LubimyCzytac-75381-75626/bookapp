@@ -633,3 +633,11 @@ body.dark-mode .dodaj-okladke-kolumna {
     background-color: #252525 !important;
     border: 1px dashed #444 !important;
 }
+body.dark-mode .dodaj-recenzje-blok {
+    background-color: #1e1e1e !important;
+    border-color: #444 !important;
+}
+
+body.dark-mode .formularz-odpowiedzi {
+    border-top-color: #444 !important;
+}
