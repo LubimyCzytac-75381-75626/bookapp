@@ -510,10 +510,62 @@ window.pokazDetaleAutora = function(id) {
             }
 
             pokazSekcje(sekcjaAutorSzczegoly);
+            
+            // pobranie i wyswietlenie ksiazek tego autora
+            pobierzKsiazkiAutora(id);
         })
         .catch(err => console.log('blad pobierania danych autora', err));
 }
 
+// wyswietlanie listy ksiazek autora
+function pobierzKsiazkiAutora(authorId) {
+    const obszar = document.getElementById('lista-ksiazek-autora');
+    if (!obszar) return;
+
+    obszar.innerHTML = '<p class="pusty-stan">Ładowanie książek...</p>';
+
+    fetch(`/book/?authorId=${authorId}`)
+        .then(res => res.json())
+        .then(dane => {
+            obszar.innerHTML = '';
+            
+            if(dane.length === 0) {
+                obszar.innerHTML = '<p class="pusty-stan">Brak książek tego autora w bazie.</p>';
+                return;
+            }
+
+            dane.forEach(k => {
+                if (!listaPobranychKsiazek.find(szukana => szukana.id === k.id)) {
+                    listaPobranychKsiazek.push(k);
+                }
+
+                const ramka = document.createElement('div');
+                ramka.className = 'karta-ksiazki';
+                
+                let tekstAutorow = "Brak autora";
+                if(k.authors && k.authors.length > 0) {
+                    tekstAutorow = k.authors.map(a => `<span class="klikany-autor" onclick="skadWidokAutora = sekcjaAutorSzczegoly; pokazDetaleAutora(${a.id}); event.stopPropagation();">${a.name}</span>`).join(', ');
+                }
+
+                ramka.innerHTML = `
+                    <img src="/book/${k.id}/cover" class="karta-img" onerror="this.outerHTML='<div class=\\'karta-okladka-zastepcza\\'>Brak okładki</div>'">
+                    <div class="karta-info">
+                        <h3 class="karta-tytul">${k.name}</h3>
+                        <p class="karta-autor">${tekstAutorow}</p>
+                        <p style="font-size: 12px; color: #666; margin-bottom: 10px;">Rok: ${k.bookYear}</p>
+                        <button class="btn-akcja btn-maly" onclick="pokazDetale(${k.id})">Szczegóły</button>
+                    </div>
+                `;
+                obszar.appendChild(ramka);
+            });
+        })
+        .catch(err => {
+            console.log('blad pobierania ksiazek autora', err);
+            obszar.innerHTML = '<p class="pusty-stan">Błąd ładowania książek.</p>';
+        });
+}
+
+// pobieranie i wyswietlanie recenzji 
 function odswiezRecenzje(ksiazkaId) {
     const obszarRecenzji = document.getElementById('lista-recenzji');
     obszarRecenzji.innerHTML = '<p class="pusty-stan">Ładowanie recenzji...</p>';
@@ -591,6 +643,7 @@ function odswiezRecenzje(ksiazkaId) {
         });
 }
 
+// pokazywanie pola do wpisania odpowiedzi
 window.pokazFormularzOdpowiedzi = function(id, przycisk) {
     const kontener = przycisk.nextElementSibling;
     if (kontener.style.display === 'none') {
@@ -602,6 +655,7 @@ window.pokazFormularzOdpowiedzi = function(id, przycisk) {
     }
 };
 
+// zapis zagniezdzonej odpowiedzi do bazy
 window.wyslijOdpowiedz = function(e, parentId) {
     e.preventDefault();
     if(!sprawdzanaKsiazkaId) return;
@@ -623,8 +677,12 @@ window.wyslijOdpowiedz = function(e, parentId) {
         },
         body: JSON.stringify(odpowiedzDane)
     })
-    .then(res => {
-        if (!res.ok) throw new Error("Błąd zapisu odpowiedzi");
+    .then(async res => {
+        if (!res.ok) {
+            const errorText = await res.text();
+            console.error("Błąd serwera:", errorText);
+            throw new Error(errorText);
+        }
         return res.json();
     })
     .then(() => {
@@ -632,10 +690,11 @@ window.wyslijOdpowiedz = function(e, parentId) {
     })
     .catch(err => {
         console.log('blad zapisu odpowiedzi', err);
-        alert("Wystąpił błąd podczas dodawania odpowiedzi.");
+        alert("Błąd podczas dodawania odpowiedzi. Sprawdź konsolę.");
     });
 };
 
+// zapis nowej recenzji do bazy
 const formRecenzja = document.getElementById('formularz-recenzji');
 
 formRecenzja.addEventListener('submit', (e) => {
@@ -647,7 +706,7 @@ formRecenzja.addEventListener('submit', (e) => {
         userName: document.getElementById('recenzja-autor').value.trim(),
         grade: parseInt(document.getElementById('recenzja-ocena').value),
         reviewText: document.getElementById('recenzja-tekst').value.trim(),
-        children: []
+        children: [] 
     };
 
     fetch('/book-review/save', {
@@ -657,8 +716,12 @@ formRecenzja.addEventListener('submit', (e) => {
         },
         body: JSON.stringify(recenzjaDane)
     })
-    .then(res => {
-        if (!res.ok) throw new Error("Błąd podczas zapisywania recenzji.");
+    .then(async res => {
+        if (!res.ok) {
+            const errorText = await res.text();
+            console.error("Błąd serwera:", errorText);
+            throw new Error(errorText);
+        }
         return res.json();
     })
     .then(() => {
@@ -667,7 +730,7 @@ formRecenzja.addEventListener('submit', (e) => {
     })
     .catch(err => {
         console.log('blad zapisu recenzji', err);
-        alert("Nie udało się dodać recenzji. Sprawdź serwer.");
+        alert("Nie udało się dodać recenzji. Sprawdź konsolę.");
     });
 });
 
