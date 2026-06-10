@@ -297,7 +297,10 @@ formularzAutora.addEventListener('submit', (e) => {
         },
         body: JSON.stringify(nowyAutor)
     })
-    .then(res => res.json())
+    .then(res => {
+        if (!res.ok) throw new Error("Błąd z serwerem");
+        return res.json();
+    })
     .then(zapisanyAutor => {
         if (plikAutora && zapisanyAutor && zapisanyAutor.id) {
             const formData = new FormData();
@@ -384,7 +387,12 @@ formKsiazki.addEventListener('submit', (e) => {
     });
 
     if(zebraniAutorzy.length === 0) {
-        alert("Musisz wybrać autora z listy!");
+        alert("Musisz wybrać prawidłowego autora z listy!");
+        return;
+    }
+
+    if(zebraneKategorie.length === 0) {
+        alert("Musisz wybrać prawidłową kategorię z listy!");
         return;
     }
 
@@ -406,7 +414,10 @@ formKsiazki.addEventListener('submit', (e) => {
         },
         body: JSON.stringify(ksiazkaDane)
     })
-    .then(res => res.json())
+    .then(res => {
+        if (!res.ok) throw new Error("Błąd podczas zapisywania książki. Sprawdź serwer.");
+        return res.json();
+    })
     .then(zapisanaKsiazka => {
         if (plikOkladki && zapisanaKsiazka && zapisanaKsiazka.id) {
             const formData = new FormData();
@@ -428,7 +439,10 @@ formKsiazki.addEventListener('submit', (e) => {
         pokazSekcje(sekcjaLista);
         pobierzKsiazki();
     })
-    .catch(err => console.log('blad zapisu ksiazki', err));
+    .catch(err => {
+        console.log('blad zapisu ksiazki', err);
+        alert("Zapisywanie nie powiodło się! Sprawdź czy wybrałeś dane z listy.");
+    });
 });
 
 window.pokazDetale = function(id) {
